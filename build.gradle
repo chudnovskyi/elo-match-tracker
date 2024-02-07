@@ -1,25 +1,53 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.2.2'
-	id 'io.spring.dependency-management' version '1.1.4'
+    id 'java'
+    id 'org.springframework.boot' version '3.2.2'
+    id 'io.spring.dependency-management' version '1.1.4'
 }
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 
 java {
-	sourceCompatibility = '17'
+    sourceCompatibility = '17'
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'org.springframework.boot:spring-boot-starter'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
-tasks.named('test') {
-	useJUnitPlatform()
+testing {
+    suites {
+        test {
+            sources { java { srcDirs = ['src/test/unit/java'] } resources { srcDirs = ['src/test/unit/resources'] } }
+            useJUnitJupiter()
+            dependencies {
+                implementation project()
+
+                implementation 'org.springframework.boot:spring-boot-starter-test'
+            }
+        }
+        integrationTest(JvmTestSuite) {
+            sources { java { srcDirs = ['src/test/integration/java'] } resources { srcDirs = ['src/test/integration/resources'] } }
+            useJUnitJupiter()
+            dependencies {
+                implementation project()
+
+                implementation 'org.springframework.boot:spring-boot-starter-test'
+            }
+        }
+        end2endTest(JvmTestSuite) {
+            sources { java { srcDirs = ['src/test/end2end/java'] } resources { srcDirs = ['src/test/end2end/resources'] } }
+            useJUnitJupiter()
+            dependencies {
+                implementation project()
+
+                implementation 'org.springframework.boot:spring-boot-starter-test'
+            }
+        }
+    }
 }
