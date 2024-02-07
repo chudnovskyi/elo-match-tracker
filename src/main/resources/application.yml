@@ -8,6 +8,8 @@ dbSchema: app_java_spring_template
 spring:
   application:
     name: java-spring-template
+    version: 0.0.1.test
+    description: java template project, feel free to change
   datasource:
     url: jdbc:postgresql://${dbHost}:${dbPort}/${dbName}
     username: ${dbUsername}
@@ -19,6 +21,29 @@ spring:
     properties:
       hibernate:
         default_schema: ${dbSchema}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+  health:
+    diskspace:
+      enabled: false
+  info:
+    env:
+      enabled: true
+  server:
+    port: 9090
+
+info:
+  app:
+    name: ${spring.application.name}
+    version: ${spring.application.version}
+    description: ${spring.application.description}
 
 springdoc:
   swagger-ui:
