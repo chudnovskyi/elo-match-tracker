@@ -1,0 +1,20 @@
+# temporary solution, while k8s is not configured
+version: '3.8'
+services:
+  postgres:
+    container_name: postgres_container_template
+    hostname: postgres_container_template
+    image: postgres:alpine3.17
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_DB: template_name
+      POSTGRES_USER: template_username
+      POSTGRES_PASSWORD: template_password
+      PGDATA: /data
+    volumes:
+      - db-postgres:/data
+
+volumes:
+  db-postgres: { }

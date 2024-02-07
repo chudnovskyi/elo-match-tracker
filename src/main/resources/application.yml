@@ -1,0 +1,25 @@
+dbHost: localhost
+dbPort: 5432
+dbName: template_name
+dbUsername: template_username
+dbPassword: template_password
+dbSchema: app_java_spring_template
+
+spring:
+  application:
+    name: java-spring-template
+  datasource:
+    url: jdbc:postgresql://${dbHost}:${dbPort}/${dbName}
+    username: ${dbUsername}
+    password: ${dbPassword}
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    schemas: ${dbSchema}
+  jpa:
+    properties:
+      hibernate:
+        default_schema: ${dbSchema}
+
+springdoc:
+  swagger-ui:
+    path: /
