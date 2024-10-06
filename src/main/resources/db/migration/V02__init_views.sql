@@ -1,5 +1,5 @@
-CREATE VIEW user_view AS
-SELECT user_id,
-       first_name,
-       last_name
-FROM user_;
+CREATE VIEW player_view AS
+SELECT player_id,
+       username,
+       elo_rating
+FROM player_;
