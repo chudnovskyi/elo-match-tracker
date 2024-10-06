@@ -27,6 +27,8 @@ dependencies {
 
     implementation 'org.projectlombok:lombok:1.18.28'
     annotationProcessor 'org.projectlombok:lombok:1.18.28'
+
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 }
 
 testing {

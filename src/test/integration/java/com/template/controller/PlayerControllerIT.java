@@ -7,33 +7,33 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.template.ITBase;
-import com.template.entity.User;
-import com.template.model.exception.UserNotFoundException;
-import com.template.repository.UserRepository;
+import com.template.entity.Player;
+import com.template.model.exception.PlayerNotFoundException;
+import com.template.repository.PlayerRepository;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 @RequiredArgsConstructor
-public class UserControllerIT extends ITBase {
+public class PlayerControllerIT extends ITBase {
 
   private final MockMvc mockMvc;
 
-  private final UserRepository userRepository;
+  private final PlayerRepository userRepository;
 
   @Test
   void getUserBpId_withPreCreatedUser_expectResponseMatch() throws Exception {
-    User user = User.builder().userId(123L).firstName("John").lastName("Doe").build();
-    userRepository.save(user);
+    Player player = Player.builder().userId(123L).firstName("John").lastName("Doe").build();
+    userRepository.save(player);
 
     mockMvc
-        .perform(get("/api/v1/users/").param("userId", user.getUserId().toString()))
+        .perform(get("/api/v1/users/").param("userId", player.getUserId().toString()))
         .andExpectAll(
             status().isOk(),
-            jsonPath("$.userId").value(user.getUserId()),
-            jsonPath("$.firstName").value(user.getFirstName()),
-            jsonPath("$.lastName").value(user.getLastName()));
+            jsonPath("$.userId").value(player.getUserId()),
+            jsonPath("$.firstName").value(player.getFirstName()),
+            jsonPath("$.lastName").value(player.getLastName()));
   }
 
   @Test
@@ -42,7 +42,7 @@ public class UserControllerIT extends ITBase {
         .perform(get("/api/v1/users/").param("userId", "999"))
         .andExpectAll(
             status().isNotFound(),
-            jsonPath("$.type").value(UserNotFoundException.class.getSimpleName()),
+            jsonPath("$.type").value(PlayerNotFoundException.class.getSimpleName()),
             jsonPath("$.status").value(404));
   }
 
