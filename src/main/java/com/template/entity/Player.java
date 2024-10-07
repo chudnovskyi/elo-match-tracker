@@ -16,7 +16,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "player_",
+@Table(name = "player",
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = "username")
         })
@@ -34,17 +34,4 @@ public class Player {
 
   @Column(name = "registered_at", updatable = false)
   private LocalDateTime registeredAt = LocalDateTime.now();
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    Player player = (Player) o;
-    return Objects.equals(playerId, player.playerId);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(playerId);
-  }
 }
