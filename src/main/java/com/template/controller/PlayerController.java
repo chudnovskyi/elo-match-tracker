@@ -1,31 +1,32 @@
 package com.template.controller;
 
-import static org.springframework.http.HttpStatus.OK;
-
 import com.template.model.request.PlayerRequest;
-import com.template.model.response.PlayerResponse;
+import com.template.service.MatchService;
 import com.template.service.PlayerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-@Validated
-@RestController
+@Controller
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/players")
+@RequestMapping("/players")
 public class PlayerController {
 
   private final PlayerService playerService;
+  private final MatchService matchService;
 
-  @GetMapping("/")
-  public ResponseEntity<PlayerResponse> getPlayerById(@RequestParam Long playerId) {
-    return new ResponseEntity<>(playerService.getPlayerById(playerId), OK);
+  @GetMapping("/ranking")
+  public String getEloRanking(Model model) {
+    model.addAttribute("players", playerService.getAllPlayers());
+    model.addAttribute("matches", matchService.getAllMatches());
+    return "ranking";
   }
 
-  @PostMapping("/")
-  public ResponseEntity<PlayerResponse> createPlayer(@Valid @RequestBody PlayerRequest request) {
-    return new ResponseEntity<>(playerService.createPlayer(request), OK);
+  @PostMapping("/register")
+  public String createPlayer(@Valid @ModelAttribute PlayerRequest request) {
+    playerService.createPlayer(request);
+    return "redirect:/players/ranking";
   }
 }

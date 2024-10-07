@@ -3,6 +3,8 @@ package com.template.configuration;
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
+import com.template.model.exception.MatchAlreadyExistsException;
+import com.template.model.exception.MatchNotFoundException;
 import com.template.model.exception.PlayerAlreadyExistsException;
 import com.template.model.exception.PlayerNotFoundException;
 import jakarta.validation.constraints.NotNull;
@@ -59,6 +61,18 @@ public class ExceptionHandlerConfiguration extends ResponseEntityExceptionHandle
   public ProblemDetail handlePlayerAlreadyExistsException(PlayerAlreadyExistsException ex, WebRequest request) {
     return constructProblemDetail(
             CONFLICT, ex.getClass().getSimpleName(), "Player already exists.. failed.", ex.getMessage(), request);
+  }
+
+  @ExceptionHandler(MatchNotFoundException.class)
+  public ProblemDetail handleMatchNotFoundException(MatchNotFoundException ex, WebRequest request) {
+    return constructProblemDetail(
+            NOT_FOUND, ex.getClass().getSimpleName(), "Match not found", ex.getMessage(), request);
+  }
+
+  @ExceptionHandler(MatchAlreadyExistsException.class)
+  public ProblemDetail handleMatchAlreadyExistsException(MatchAlreadyExistsException ex, WebRequest request) {
+    return constructProblemDetail(
+            CONFLICT, ex.getClass().getSimpleName(), "Match already exists. Failed.", ex.getMessage(), request);
   }
 
   private ProblemDetail constructProblemDetail(

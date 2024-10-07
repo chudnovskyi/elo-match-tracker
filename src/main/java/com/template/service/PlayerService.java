@@ -6,7 +6,11 @@ import com.template.model.exception.PlayerNotFoundException;
 import com.template.model.request.PlayerRequest;
 import com.template.model.response.PlayerResponse;
 import com.template.repository.PlayerRepository;
+
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,11 +21,11 @@ public class PlayerService {
   private final PlayerRepository playerRepository;
   private final PlayerMapper playerMapper;
 
-  public PlayerResponse getPlayerById(Long playerId) {
-    return playerRepository
-        .findById(playerId)
-        .map(playerMapper::mapToResponse)
-        .orElseThrow(() -> new PlayerNotFoundException(playerId));
+  public List<PlayerResponse> getAllPlayers() {
+    return playerRepository.findAll()
+            .stream()
+            .map(playerMapper::mapToResponse)
+            .collect(Collectors.toList());
   }
 
   public PlayerResponse createPlayer(PlayerRequest request) {
