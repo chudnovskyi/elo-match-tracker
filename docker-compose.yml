@@ -2,19 +2,19 @@
 version: '3.8'
 services:
   postgres:
-    container_name: postgres_container_template
-    hostname: postgres_container_template
+    container_name: postgres_container_emt
+    hostname: postgres_container_emt
     image: postgres:alpine3.17
     restart: always
     ports:
       - '5432:5432'
     environment:
-      POSTGRES_DB: template_name
-      POSTGRES_USER: template_username
-      POSTGRES_PASSWORD: template_password
-      PGDATA: /data
+      POSTGRES_DB: postgresql
+      POSTGRES_USER: username
+      POSTGRES_PASSWORD: password
+      PGDATA: /var/lib/postgresql/data
     volumes:
-      - db-postgres:/data
+      - db-postgres:/var/lib/postgresql/data
 
 volumes:
   db-postgres: { }
