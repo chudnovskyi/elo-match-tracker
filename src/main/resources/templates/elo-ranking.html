@@ -1,126 +1,80 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <link rel="stylesheet" href="./styles/styles.css">
     <title>Elo Ranking</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        table {
-            width: 60%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        th, td {
-            padding: 8px 12px;
-            border: 1px solid #ccc;
-            text-align: left;
-        }
-        th {
-            background-color: #f4f4f4;
-        }
-        .form-section {
-            margin-bottom: 20px;
-        }
-        .form-section input, .form-section select {
-            padding: 8px;
-            margin-right: 10px;
-            margin-bottom: 10px;
-            width: 200px;
-        }
-        .form-section button {
-            padding: 8px 12px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        .form-section button:hover {
-            background-color: #45a049;
-        }
-    </style>
 </head>
 <body>
+<header>
+    <nav class="header-nav">
+        <ul class="header-list">
+            <li class="header-item">
+                <a href="./elo-ranking.html" class="header-link header-link-active">Main</a>
+            </li>
+            <li class="header-item">
+                <a href="./match-history.html" class="header-link">Match History</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main>
+    <h1>Elo Ranking</h1>
+    <p>No login required, and your data is never sent anywhere.</p>
 
-<h1>Elo Ranking</h1>
-<p>No login required, and your data is never sent anywhere.</p>
+    <h2>Current Rankings</h2>
 
-<h2>Current Rankings</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>Rank</th>
+            <th>Name</th>
+            <th>Elo Rating</th>
+            <th>W/L Record</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="player, stat : ${players}">
+            <td th:text="${stat.count}">1</td>
+            <td th:text="${player.name}">Player 1</td>
+            <td th:text="${player.eloRating}">1200</td>
+            <td th:text="${player.winLossRecord}">5/3</td>
+        </tr>
+        </tbody>
+    </table>
 
-<table>
-    <thead>
-    <tr>
-        <th>Rank</th>
-        <th>Name</th>
-        <th>Elo Rating</th>
-        <th>W/L Record</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="player, stat : ${players}">
-        <td th:text="${stat.count}">1</td>
-        <td th:text="${player.name}">Player 1</td>
-        <td th:text="${player.eloRating}">1200</td>
-        <td th:text="${player.winLossRecord}">5/3</td>
-    </tr>
-    </tbody>
-</table>
+    <div class="form-section">
+        <h2>Add a New Player</h2>
+        <form th:action="@{/players/register}" th:object="${playerRequest}" method="post">
+            <input type="text" th:field="*{username}" placeholder="Enter player name" required>
+            <button type="submit">Add Player</button>
+            <div th:if="${errorMessage}">
+                <p style="color: red;" th:text="${errorMessage}"></p>
+            </div>
+        </form>
+    </div>
 
-<div class="form-section">
-    <h2>Add a New Player</h2>
-    <form th:action="@{/players/register}" th:object="${playerRequest}" method="post">
-        <input type="text" th:field="*{username}" placeholder="Enter player name" required>
-        <button type="submit">Add Player</button>
-        <div th:if="${errorMessage}">
-            <p style="color: red;" th:text="${errorMessage}"></p>
-        </div>
-    </form>
-</div>
+    <div class="form-section">
+        <h2>Report Match Outcome</h2>
+        <form th:action="@{/matches/report}" method="post">
+            <select name="player1Id" required>
+                <option value="" disabled selected>Select Player 1</option>
+                <option th:each="player : ${players}" th:value="${player.id}" th:text="${player.name}"></option>
+            </select>
 
-<div class="form-section">
-    <h2>Report Match Outcome</h2>
-    <form th:action="@{/matches/report}" method="post">
-        <select name="player1Id" required>
-            <option value="" disabled selected>Select Player 1</option>
-            <option th:each="player : ${players}" th:value="${player.id}" th:text="${player.name}"></option>
-        </select>
+            <select name="player2Id" required>
+                <option value="" disabled selected>Select Player 2</option>
+                <option th:each="player : ${players}" th:value="${player.id}" th:text="${player.name}"></option>
+            </select>
 
-        <select name="player2Id" required>
-            <option value="" disabled selected>Select Player 2</option>
-            <option th:each="player : ${players}" th:value="${player.id}" th:text="${player.name}"></option>
-        </select>
+            <select name="outcome" required>
+                <option value="" disabled selected>Select Outcome</option>
+                <option value="1">Player 1 Wins</option>
+                <option value="2">Player 2 Wins</option>
+            </select>
 
-        <select name="outcome" required>
-            <option value="" disabled selected>Select Outcome</option>
-            <option value="1">Player 1 Wins</option>
-            <option value="2">Player 2 Wins</option>
-        </select>
-
-        <button type="submit">Submit Result</button>
-    </form>
-</div>
-
-<h2>Match History</h2>
-
-<table>
-    <thead>
-    <tr>
-        <th>Date</th>
-        <th>Player 1</th>
-        <th>Player 2</th>
-        <th>Outcome</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="match : ${matches}">
-        <td th:text="${#dates.format(match.date, 'yyyy-MM-dd')}">2024-10-05</td>
-        <td th:text="${match.player1.name}">Player 1</td>
-        <td th:text="${match.player2.name}">Player 2</td>
-        <td th:text="${match.outcome}">Player 1 Wins</td>
-    </tr>
-    </tbody>
-</table>
-
+            <button type="submit">Submit Result</button>
+        </form>
+    </div>
+</main>
 </body>
 </html>
