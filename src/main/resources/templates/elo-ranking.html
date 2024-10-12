@@ -18,30 +18,6 @@
     </nav>
 </header>
 <main>
-    <h1>Elo Ranking</h1>
-    <p>No login required, and your data is never sent anywhere.</p>
-
-    <h2>Current Rankings</h2>
-
-    <table>
-        <thead>
-        <tr>
-            <th>Rank</th>
-            <th>Name</th>
-            <th>Elo Rating</th>
-            <th>W/L Record</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="player, stat : ${players}">
-            <td th:text="${stat.count}">1</td>
-            <td th:text="${player.name}">Player 1</td>
-            <td th:text="${player.eloRating}">1200</td>
-            <td th:text="${player.winLossRecord}">5/3</td>
-        </tr>
-        </tbody>
-    </table>
-
     <div class="form-section">
         <h2>Add a New Player</h2>
         <form th:action="@{/players/register}" th:object="${playerRequest}" method="post">
