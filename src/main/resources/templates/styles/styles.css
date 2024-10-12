@@ -38,7 +38,6 @@ body {
     transform: translateY(2px);
 }
 
-/* Стиль для активной кнопки */
 .header-link-active {
     background: linear-gradient(45deg, #ff7f50, #ff6347);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);

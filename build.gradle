@@ -5,7 +5,12 @@ plugins {
     id 'com.google.cloud.tools.jib' version '3.3.1'
 }
 
-sourceCompatibility = '17'
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
 
 repositories {
     mavenCentral()
@@ -69,8 +74,8 @@ testing {
 
                 implementation 'org.testcontainers:junit-jupiter:1.17.6'
 
-                implementation "org.projectlombok:lombok:1.18.20"
-                annotationProcessor "org.projectlombok:lombok:1.18.20"
+                implementation "org.projectlombok:lombok:1.18.28"
+                annotationProcessor "org.projectlombok:lombok:1.18.28"
             }
         }
     }
