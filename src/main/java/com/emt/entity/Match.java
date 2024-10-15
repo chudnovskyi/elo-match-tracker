@@ -1,6 +1,5 @@
 package com.emt.entity;
 
-import com.emt.entity.enums.MatchOutcome;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -24,18 +23,17 @@ public class Match {
 
   @NotNull(message = "Player 1 should not be null.")
   @ManyToOne
-  @JoinColumn(name = "winner_id", nullable = false)
-  private Player winner;
+  @JoinColumn(name = "player_one")
+  private Player playerOne;
 
   @NotNull(message = "Player 2 should not be null.")
   @ManyToOne
-  @JoinColumn(name = "loser_id", nullable = false)
-  private Player loser;
+  @JoinColumn(name = "player_two")
+  private Player playerTwo;
 
-  @Column(name = "match_date", updatable = false)
-  private Instant matchDate;
+  @NotNull(message = "Winner should not be null.")
+  private String winner;
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "outcome", nullable = false)
-  private MatchOutcome outcome;
+  @Column(name = "match_time", updatable = false)
+  private Instant matchTime;
 }

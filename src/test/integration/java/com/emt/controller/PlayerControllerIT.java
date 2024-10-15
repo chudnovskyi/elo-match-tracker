@@ -24,7 +24,7 @@ public class PlayerControllerIT extends ITBase {
 
   @Test
   void getUserBpId_withPreCreatedUser_expectResponseMatch() throws Exception {
-    Player player = Player.builder().playerId(123L).username("hopondeadlock@gmail.com").eloRating(1300).build();
+    Player player = Player.builder().playerId(123L).nickname("hopondeadlock@gmail.com").eloRating(1300).build();
     userRepository.save(player);
 
     mockMvc
@@ -32,7 +32,7 @@ public class PlayerControllerIT extends ITBase {
         .andExpectAll(
             status().isOk(),
             jsonPath("$.userId").value(player.getPlayerId()),
-            jsonPath("$.firstName").value(player.getUsername()),
+            jsonPath("$.firstName").value(player.getNickname()),
             jsonPath("$.lastName").value(player.getEloRating()));
   }
 

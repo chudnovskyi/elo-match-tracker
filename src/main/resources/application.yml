@@ -11,7 +11,7 @@ spring:
     version: 0.0.1.test
     description: Manage player registrations and track 1v1 matches using the Elo ranking system.
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
+    url: jdbc:postgresql://${dbHost}:${dbPort}/${dbName}
     username: ${dbUsername}
     password: ${dbPassword}
     driver-class-name: org.postgresql.Driver

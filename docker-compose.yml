@@ -1,5 +1,4 @@
 # temporary solution, while k8s is not configured
-version: '3.8'
 services:
   postgres:
     container_name: postgres_container_emt
@@ -7,14 +6,14 @@ services:
     image: postgres:latest
     restart: always
     ports:
-      - '5432:5432'
+      - '5435:5435'
     environment:
       POSTGRES_DB: postgres
-      POSTGRES_USER: username
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      PGDATA: /var/lib/postgresql/data
+      PGDATA: /data
     volumes:
-      - db-postgres:/var/lib/postgresql/data
+      - db-postgres:/data
 
 volumes:
   db-postgres: { }

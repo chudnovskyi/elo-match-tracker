@@ -1,9 +1,10 @@
 package com.emt.model.response;
 
+import com.emt.entity.Player;
 import lombok.Builder;
 
 import java.time.Instant;
 
 @Builder
 public record CreateMatchResponse(
-    Long matchId, String playerOneName, String playerTwoName, Instant matchDate, String outcome) {}
+    Long matchId, Player playerOneName, Player playerTwoName, Instant matchTime, String winner) {}
