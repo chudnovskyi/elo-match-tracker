@@ -9,47 +9,75 @@
     <nav class="header-nav">
         <ul class="header-list">
             <li class="header-item">
-                <a href="./elo-ranking.html" class="header-link header-link-active">Main</a>
+                <a href="/players" class="header-link header-link-active">Main</a>
             </li>
             <li class="header-item">
-                <a href="./match-history.html" class="header-link">Match History</a>
+                <a href="/matches/history" class="header-link">Match History</a>
             </li>
         </ul>
     </nav>
 </header>
+
+<h2>Player Rankings</h2>
+<ul>
+    <li th:each="player : ${players}">
+        <span th:text="${player.nickname}">nickname</span>
+        <span th:text="${player.eloRating}">rating</span>
+    </li>
+</ul>
+
 <main>
     <div class="form-section">
         <h2>Add a New Player</h2>
         <form th:action="@{/players/register}" th:object="${playerRequest}" method="post">
-            <input type="text" th:field="*{username}" placeholder="Enter player name" required>
+            <input type="text" th:field="*{nickname}" placeholder="Enter player name" required>
             <button type="submit">Add Player</button>
-            <div th:if="${errorMessage}">
-                <p style="color: red;" th:text="${errorMessage}"></p>
+            <div th:if="${error}">
+                <p style="color: red;" th:text="${error}"></p>
+            </div>
+            <div th:if="${message}">
+                <p style="color: green;" th:text="${message}"></p>
             </div>
         </form>
     </div>
 
     <div class="form-section">
         <h2>Report Match Outcome</h2>
-        <form th:action="@{/matches/report}" method="post">
-            <select name="player1Id" required>
+        <form th:action="@{/matches/report}" method="post" th:object="${matchRequest}">
+            <select th:field="*{playerOneName}" id="playerOne" required>
                 <option value="" disabled selected>Select Player 1</option>
-                <option th:each="player : ${players}" th:value="${player.id}" th:text="${player.name}"></option>
+                <option th:each="player : ${players}" th:value="${player.playerId}" th:text="${player.nickname}"></option>
             </select>
 
-            <select name="player2Id" required>
+            <select th:field="*{playerTwoName}" id="playerTwo" required>
                 <option value="" disabled selected>Select Player 2</option>
-                <option th:each="player : ${players}" th:value="${player.id}" th:text="${player.name}"></option>
+                <option th:each="player : ${players}" th:value="${player.playerId}" th:text="${player.nickname}"></option>
             </select>
 
-            <select name="outcome" required>
+            <select th:field="*{winner}" id="winner" required>
                 <option value="" disabled selected>Select Outcome</option>
-                <option value="1">Player 1 Wins</option>
-                <option value="2">Player 2 Wins</option>
             </select>
 
             <button type="submit">Submit Result</button>
         </form>
+
+        <script>
+            const playerOneSelect = document.getElementById("playerOne");
+            const playerTwoSelect = document.getElementById("playerTwo");
+            const winnerSelect = document.getElementById("winner");
+
+            function updateWinnerOptions() {
+                winnerSelect.innerHTML = `
+            <option value="" disabled selected>Select Outcome</option>
+            <option value="${playerOneSelect.value}">Player 1 Wins</option>
+            <option value="${playerTwoSelect.value}">Player 2 Wins</option>
+        `;
+            }
+
+            playerOneSelect.addEventListener("change", updateWinnerOptions);
+            playerTwoSelect.addEventListener("change", updateWinnerOptions);
+        </script>
+
     </div>
 </main>
 </body>

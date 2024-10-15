@@ -1,6 +1,6 @@
 package com.emt.controller;
 
-import com.emt.model.exception.PlayerAlreadyExistsException;
+import com.emt.model.request.CreateMatchRequest;
 import com.emt.model.request.CreatePlayerRequest;
 import com.emt.model.response.CreatePlayerResponse;
 import com.emt.service.PlayerService;
@@ -24,19 +24,17 @@ public class PlayerController {
   public String getAllPlayers(Model model) {
     List<CreatePlayerResponse> players = playerService.getAllPlayers();
     model.addAttribute("players", players);
+    model.addAttribute("playerRequest", new CreatePlayerRequest(""));
+    model.addAttribute("matchRequest", new CreateMatchRequest(null, null, null));
     return "elo-ranking";
   }
 
   @PostMapping("/register")
   public String createPlayer(
-      @Valid @ModelAttribute CreatePlayerRequest playerRequest,
+      @Valid @ModelAttribute("playerRequest") CreatePlayerRequest playerRequest,
       RedirectAttributes redirectAttributes) {
-    try {
-      playerService.createPlayer(playerRequest);
-      redirectAttributes.addFlashAttribute("message", "Player added successfully!");
-    } catch (PlayerAlreadyExistsException e) {
-      redirectAttributes.addFlashAttribute("error", e.getMessage());
-    }
+    playerService.createPlayer(playerRequest);
+    redirectAttributes.addFlashAttribute("message", "Player added successfully!");
     return "redirect:/players";
   }
 }

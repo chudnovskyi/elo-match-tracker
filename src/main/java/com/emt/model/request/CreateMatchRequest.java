@@ -1,8 +1,5 @@
 package com.emt.model.request;
 
-import jakarta.validation.constraints.NotNull;
+import com.emt.entity.Player;
 
-public record CreateMatchRequest(
-    @NotNull(message = "Player 1 ID should not be null.") Long playerOneId,
-    @NotNull(message = "Player 2 ID should not be null.") Long playerTwoId,
-    @NotNull(message = "Winner ID should not be null.") Long winnerId) {}
+public record CreateMatchRequest(Player playerOneName, Player playerTwoName, String winner) {}

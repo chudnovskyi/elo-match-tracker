@@ -3,6 +3,7 @@ package com.emt.configuration;
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
+import com.emt.model.exception.IdenticalPlayersException;
 import com.emt.model.exception.MatchNotFoundException;
 import com.emt.model.exception.PlayerAlreadyExistsException;
 import com.emt.model.exception.PlayerNotFoundException;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Slf4j
 @RestControllerAdvice
@@ -58,11 +60,24 @@ public class ExceptionHandlerConfiguration extends ResponseEntityExceptionHandle
 
   @ExceptionHandler(PlayerAlreadyExistsException.class)
   public ProblemDetail handlePlayerAlreadyExistsException(
-      PlayerAlreadyExistsException ex, WebRequest request) {
+      PlayerAlreadyExistsException ex, WebRequest request, RedirectAttributes redirectAttributes) {
+    redirectAttributes.addFlashAttribute("error", "Player already exists: " + ex.getMessage());
     return constructProblemDetail(
         CONFLICT,
         ex.getClass().getSimpleName(),
         "Player already exists.. failed.",
+        ex.getMessage(),
+        request);
+  }
+
+  @ExceptionHandler(IdenticalPlayersException.class)
+  public ProblemDetail handleIdenticalPlayersException(
+      IdenticalPlayersException ex, WebRequest request, RedirectAttributes redirectAttributes) {
+    redirectAttributes.addFlashAttribute("error", "Match creation failed: " + ex.getMessage());
+    return constructProblemDetail(
+        CONFLICT,
+        ex.getClass().getSimpleName(),
+        "Match creation failed due to identical players.",
         ex.getMessage(),
         request);
   }

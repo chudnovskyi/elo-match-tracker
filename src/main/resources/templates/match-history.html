@@ -9,10 +9,10 @@
     <nav class="header-nav">
         <ul class="header-list">
             <li class="header-item">
-                <a href="./elo-ranking.html" class="header-link">Main</a>
+                <a href="/players" class="header-link">Main</a>
             </li>
             <li class="header-item">
-                <a href="./match-history.html" class="header-link header-link-active">Match History</a>
+                <a href="/matches/history" class="header-link header-link-active">Match History</a>
             </li>
         </ul>
     </nav>
@@ -25,15 +25,15 @@
             <th>Date</th>
             <th>Player 1</th>
             <th>Player 2</th>
-            <th>Outcome</th>
+            <th>Winner</th>
         </tr>
         </thead>
         <tbody>
         <tr th:each="match : ${matches}">
-            <td th:text="${#dates.format(match.date, 'yyyy-MM-dd')}">2024-10-05</td>
-            <td th:text="${match.player1.name}">Player 1</td>
-            <td th:text="${match.player2.name}">Player 2</td>
-            <td th:text="${match.outcome}">Player 1 Wins</td>
+            <td th:text="${#dates.format(match.matchTime, 'yyyy-MM-dd')}">2024-10-05</td>
+            <td th:text="${match.playerOneName}">Player 1</td>
+            <td th:text="${match.playerTwoName}">Player 2</td>
+            <td th:text="${match.winner}">Player 1 Wins</td>
         </tr>
         </tbody>
     </table>

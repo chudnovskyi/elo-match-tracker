@@ -6,7 +6,6 @@ import com.emt.model.request.CreatePlayerRequest;
 import com.emt.model.response.CreatePlayerResponse;
 import com.emt.repository.PlayerRepository;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,14 +25,10 @@ public class PlayerService {
 
   public CreatePlayerResponse createPlayer(CreatePlayerRequest request) {
     return Optional.of(request)
-        .filter(req -> !playerRepository.existsByUsername(req.username()))
+        .filter(req -> !playerRepository.existsByNickname(req.nickname()))
         .map(playerMapper::mapToEntity)
-        .map(
-            player -> {
-              player.setRegisteredAt(Instant.now());
-              return playerRepository.save(player);
-            })
+        .map(playerRepository::save)
         .map(playerMapper::mapToResponse)
-        .orElseThrow(() -> new PlayerAlreadyExistsException(request.username()));
+        .orElseThrow(() -> new PlayerAlreadyExistsException(request.nickname()));
   }
 }
