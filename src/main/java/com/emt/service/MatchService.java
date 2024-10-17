@@ -3,13 +3,12 @@ package com.emt.service;
 import com.emt.mapper.MatchMapper;
 import com.emt.model.exception.IdenticalPlayersException;
 import com.emt.model.request.CreateMatchRequest;
-import com.emt.model.response.CreateMatchResponse;
+import com.emt.model.response.MatchResponse;
 import com.emt.repository.MatchRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -18,18 +17,25 @@ public class MatchService {
   private final MatchRepository matchRepository;
   private final MatchMapper matchMapper;
 
-  public List<CreateMatchResponse> getAllMatches() {
+  private final PlayerService playerService;
+
+  public List<MatchResponse> getAllMatches() {
     return matchRepository.findAll().stream().map(matchMapper::mapToResponse).toList();
   }
 
-  public CreateMatchResponse createMatch(CreateMatchRequest request) {
+  public MatchResponse createMatch(CreateMatchRequest request) {
+    if (request.winnerId().equals(request.looserId())) {
+      throw new IdenticalPlayersException("A match cannot be created with identical players.");
+    }
+
     return Optional.of(request)
-        .filter(req -> !req.playerOneName().equals(req.playerTwoName()))
-        .map(req -> matchMapper.mapToEntity(req.playerOneName(), req.playerTwoName(), req.winner()))
+        .map(
+            req ->
+                matchMapper.mapToEntity(
+                    playerService.getReferenceById(req.winnerId()),
+                    playerService.getReferenceById(req.looserId())))
         .map(matchRepository::save)
         .map(matchMapper::mapToResponse)
-        .orElseThrow(
-            () ->
-                new IdenticalPlayersException("A match cannot be created with identical players."));
+        .orElseThrow();
   }
 }

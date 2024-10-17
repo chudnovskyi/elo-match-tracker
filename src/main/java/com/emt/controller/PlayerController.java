@@ -5,13 +5,12 @@ import com.emt.model.request.CreatePlayerRequest;
 import com.emt.model.response.CreatePlayerResponse;
 import com.emt.service.PlayerService;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import java.util.List;
 
 @Controller
 @RequestMapping("/players")
@@ -24,8 +23,8 @@ public class PlayerController {
   public String getAllPlayers(Model model) {
     List<CreatePlayerResponse> players = playerService.getAllPlayers();
     model.addAttribute("players", players);
-    model.addAttribute("playerRequest", new CreatePlayerRequest(""));
-    model.addAttribute("matchRequest", new CreateMatchRequest(null, null, null));
+    model.addAttribute("playerRequest", CreatePlayerRequest.builder().build());
+    model.addAttribute("matchRequest", CreateMatchRequest.builder().build());
     return "elo-ranking";
   }
 
@@ -33,6 +32,7 @@ public class PlayerController {
   public String createPlayer(
       @Valid @ModelAttribute("playerRequest") CreatePlayerRequest playerRequest,
       RedirectAttributes redirectAttributes) {
+
     playerService.createPlayer(playerRequest);
     redirectAttributes.addFlashAttribute("message", "Player added successfully!");
     return "redirect:/players";

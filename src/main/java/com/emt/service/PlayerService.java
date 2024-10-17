@@ -1,14 +1,14 @@
 package com.emt.service;
 
+import com.emt.entity.Player;
 import com.emt.mapper.PlayerMapper;
 import com.emt.model.exception.PlayerAlreadyExistsException;
+import com.emt.model.exception.PlayerNotFoundException;
 import com.emt.model.request.CreatePlayerRequest;
 import com.emt.model.response.CreatePlayerResponse;
 import com.emt.repository.PlayerRepository;
-
 import java.util.List;
 import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,11 +24,19 @@ public class PlayerService {
   }
 
   public CreatePlayerResponse createPlayer(CreatePlayerRequest request) {
+    if (playerRepository.existsByNickname(request.nickname())) {
+      throw new PlayerAlreadyExistsException(request.nickname());
+    }
+
     return Optional.of(request)
-        .filter(req -> !playerRepository.existsByNickname(req.nickname()))
         .map(playerMapper::mapToEntity)
         .map(playerRepository::save)
         .map(playerMapper::mapToResponse)
-        .orElseThrow(() -> new PlayerAlreadyExistsException(request.nickname()));
+        .orElseThrow();
+  }
+
+  public Player getReferenceById(Long playerId) {
+    return Optional.of(playerRepository.getReferenceById(playerId))
+        .orElseThrow(() -> new PlayerNotFoundException(playerId));
   }
 }
