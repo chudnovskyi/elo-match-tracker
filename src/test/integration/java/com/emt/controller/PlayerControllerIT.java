@@ -3,13 +3,13 @@ package com.emt.controller;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.emt.ITBase;
-import com.emt.entity.Player;
-import com.emt.model.exception.PlayerNotFoundException;
-import com.emt.repository.PlayerRepository;
+import com.emt.model.request.CreatePlayerRequest;
+import com.emt.model.response.CreatePlayerResponse;
+import com.emt.service.PlayerService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MockMvc;
@@ -20,42 +20,34 @@ public class PlayerControllerIT extends ITBase {
 
   private final MockMvc mockMvc;
 
-  private final PlayerRepository userRepository;
+  private final PlayerService playerService;
 
   @Test
-  void getUserBpId_withPreCreatedUser_expectResponseMatch() throws Exception {
-    Player player = Player.builder().playerId(123L).nickname("hopondeadlock@gmail.com").eloRating(1300).build();
-    userRepository.save(player);
+  void getPlayers_withPreCreatedPlayer_expectResponseMatch() throws Exception {
+    CreatePlayerResponse response =
+        playerService.createPlayer(
+            CreatePlayerRequest.builder().nickname("hopondeadlock@gmail.com").build());
 
     mockMvc
-        .perform(get("/players/").param("playerId", player.getPlayerId().toString()))
+        .perform(get("/players"))
         .andExpectAll(
             status().isOk(),
-            jsonPath("$.userId").value(player.getPlayerId()),
-            jsonPath("$.firstName").value(player.getNickname()),
-            jsonPath("$.lastName").value(player.getEloRating()));
-  }
-
-  @Test
-  void exceptionHandling_withNonExistingUser_expectUserNotFoundException() throws Exception {
-    mockMvc
-        .perform(get("/players/").param("playerId", "999"))
-        .andExpectAll(
-            status().isNotFound(),
-            jsonPath("$.type").value(PlayerNotFoundException.class.getSimpleName()),
-            jsonPath("$.status").value(404));
+            view().name("elo-ranking"),
+            model().attributeExists("players"),
+            model().attributeExists("playerRequest"),
+            model().attributeExists("matchRequest"),
+            model().attribute("players", List.of(response)));
   }
 
   @Test
   void exceptionHandling_badRequestBody_expectMethodArgumentNotValidException() throws Exception {
     mockMvc
         .perform(
-            post("/api/v1/users/")
+            post("/players/register")
                 .content(
                     """
                     {
-                      "username": null,
-                      "eloRating": null
+                      "nickname": null
                     }
                     """)
                 .contentType(APPLICATION_JSON))
@@ -63,7 +55,6 @@ public class PlayerControllerIT extends ITBase {
             status().isBadRequest(),
             jsonPath("$.type").value(MethodArgumentNotValidException.class.getSimpleName()),
             jsonPath("$.status").value(400),
-            jsonPath("$.detail.firstName").value("must not be null"),
-            jsonPath("$.detail.lastName").value("must not be null"));
+            jsonPath("$.detail.nickname").value("Nickname should not be null."));
   }
 }

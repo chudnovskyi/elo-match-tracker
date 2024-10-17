@@ -1,8 +1,9 @@
 dbHost: localhost
 dbPort: 5432
-dbName: postgres
-dbUsername: postgres
-dbPassword: password
+dbName: elt_database
+dbUsername: elt_user
+dbPassword: elt_pass
+dbApplicationName: ${spring.application.name}
 dbSchema: app_elo_match_tracker
 
 spring:
@@ -11,10 +12,12 @@ spring:
     version: 0.0.1.test
     description: Manage player registrations and track 1v1 matches using the Elo ranking system.
   datasource:
-    url: jdbc:postgresql://${dbHost}:${dbPort}/${dbName}
+    url: jdbc:postgresql://${dbHost}:${dbPort}/${dbName}?ApplicationName=${dbApplicationName}
     username: ${dbUsername}
     password: ${dbPassword}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 2 # default is 10, set to a reasonable value
   flyway:
     schemas: ${dbSchema}
   jpa:

@@ -43,40 +43,40 @@
 
     <div class="form-section">
         <h2>Report Match Outcome</h2>
-        <form th:action="@{/matches/report}" method="post" th:object="${matchRequest}">
-            <select th:field="*{playerOneName}" id="playerOne" required>
-                <option value="" disabled selected>Select Player 1</option>
-                <option th:each="player : ${players}" th:value="${player.playerId}" th:text="${player.nickname}"></option>
-            </select>
+<!--        <form th:action="@{/matches/report}" method="post" th:object="${matchRequest}">-->
+<!--            <select th:field="*{playerOneName}" id="playerOne" required>-->
+<!--                <option value="" disabled selected>Select Player 1</option>-->
+<!--                <option th:each="player : ${players}" th:value="${player.playerId}" th:text="${player.nickname}"></option>-->
+<!--            </select>-->
 
-            <select th:field="*{playerTwoName}" id="playerTwo" required>
-                <option value="" disabled selected>Select Player 2</option>
-                <option th:each="player : ${players}" th:value="${player.playerId}" th:text="${player.nickname}"></option>
-            </select>
+<!--            <select th:field="*{playerTwoName}" id="playerTwo" required>-->
+<!--                <option value="" disabled selected>Select Player 2</option>-->
+<!--                <option th:each="player : ${players}" th:value="${player.playerId}" th:text="${player.nickname}"></option>-->
+<!--            </select>-->
 
-            <select th:field="*{winner}" id="winner" required>
-                <option value="" disabled selected>Select Outcome</option>
-            </select>
+<!--            <select th:field="*{winner}" id="winner" required>-->
+<!--                <option value="" disabled selected>Select Outcome</option>-->
+<!--            </select>-->
 
-            <button type="submit">Submit Result</button>
-        </form>
+<!--            <button type="submit">Submit Result</button>-->
+<!--        </form>-->
 
-        <script>
-            const playerOneSelect = document.getElementById("playerOne");
-            const playerTwoSelect = document.getElementById("playerTwo");
-            const winnerSelect = document.getElementById("winner");
+<!--        <script>-->
+<!--            const playerOneSelect = document.getElementById("playerOne");-->
+<!--            const playerTwoSelect = document.getElementById("playerTwo");-->
+<!--            const winnerSelect = document.getElementById("winner");-->
 
-            function updateWinnerOptions() {
-                winnerSelect.innerHTML = `
-            <option value="" disabled selected>Select Outcome</option>
-            <option value="${playerOneSelect.value}">Player 1 Wins</option>
-            <option value="${playerTwoSelect.value}">Player 2 Wins</option>
-        `;
-            }
+<!--            function updateWinnerOptions() {-->
+<!--                winnerSelect.innerHTML = `-->
+<!--            <option value="" disabled selected>Select Outcome</option>-->
+<!--            <option value="${playerOneSelect.value}">Player 1 Wins</option>-->
+<!--            <option value="${playerTwoSelect.value}">Player 2 Wins</option>-->
+<!--        `;-->
+<!--            }-->
 
-            playerOneSelect.addEventListener("change", updateWinnerOptions);
-            playerTwoSelect.addEventListener("change", updateWinnerOptions);
-        </script>
+<!--            playerOneSelect.addEventListener("change", updateWinnerOptions);-->
+<!--            playerTwoSelect.addEventListener("change", updateWinnerOptions);-->
+<!--        </script>-->
 
     </div>
 </main>

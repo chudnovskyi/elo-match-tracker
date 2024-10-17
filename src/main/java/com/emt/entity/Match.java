@@ -1,13 +1,13 @@
 package com.emt.entity;
 
+import static jakarta.persistence.FetchType.LAZY;
+
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.Instant;
 
 @Data
 @Builder
@@ -21,19 +21,13 @@ public class Match {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long matchId;
 
-  @NotNull(message = "Player 1 should not be null.")
-  @ManyToOne
-  @JoinColumn(name = "player_one")
-  private Player playerOne;
+  @ManyToOne(fetch = LAZY)
+  @JoinColumn(name = "winner_id")
+  private Player winner;
 
-  @NotNull(message = "Player 2 should not be null.")
-  @ManyToOne
-  @JoinColumn(name = "player_two")
-  private Player playerTwo;
+  @ManyToOne(fetch = LAZY)
+  @JoinColumn(name = "looser_id")
+  private Player looser;
 
-  @NotNull(message = "Winner should not be null.")
-  private String winner;
-
-  @Column(name = "match_time", updatable = false)
-  private Instant matchTime;
+  private Instant createdAt;
 }

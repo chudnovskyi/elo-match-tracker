@@ -1,5 +1,7 @@
 package com.emt.model.request;
 
-import com.emt.entity.Player;
+import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 
-public record CreateMatchRequest(Player playerOneName, Player playerTwoName, String winner) {}
+@Builder
+public record CreateMatchRequest(@NotNull Long winnerId, @NotNull Long looserId) {}

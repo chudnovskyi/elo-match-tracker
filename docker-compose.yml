@@ -1,16 +1,17 @@
 # temporary solution, while k8s is not configured
+version: '3.8'
 services:
   postgres:
     container_name: postgres_container_emt
     hostname: postgres_container_emt
-    image: postgres:latest
+    image: postgres:alpine3.17
     restart: always
     ports:
-      - '5435:5435'
+      - '5432:5432'
     environment:
-      POSTGRES_DB: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: elt_database
+      POSTGRES_USER: elt_user
+      POSTGRES_PASSWORD: elt_pass
       PGDATA: /data
     volumes:
       - db-postgres:/data

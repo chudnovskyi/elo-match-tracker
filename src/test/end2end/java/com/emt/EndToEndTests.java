@@ -64,22 +64,7 @@ public class EndToEndTests {
     HttpResponse<String> httpResponse = getString("/actuator/info", SERVICE_PORT);
 
     assertThat(httpResponse.statusCode()).isEqualTo(200);
-    assertThat(httpResponse.body()).contains("java-spring-template");
-  }
-
-  @Test
-  void userControllerWorks() {
-    HttpResponse<String> response =
-        postString(
-            "/api/v1/users/",
-            """
-                 {
-                   "firstName": "John",
-                   "lastName": "Doe"
-                 }
-                 """);
-
-    assertThat(response.statusCode()).isEqualTo(200);
+    assertThat(httpResponse.body()).contains("elo_match_tracker");
   }
 
   @Test
