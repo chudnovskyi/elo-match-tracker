@@ -7,7 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.emt.ITBase;
 import com.emt.model.request.CreatePlayerRequest;
-import com.emt.model.response.CreatePlayerResponse;
+import com.emt.model.response.PlayerResponse;
 import com.emt.service.PlayerService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -24,9 +24,8 @@ public class PlayerControllerIT extends ITBase {
 
   @Test
   void getPlayers_withPreCreatedPlayer_expectResponseMatch() throws Exception {
-    CreatePlayerResponse response =
-        playerService.createPlayer(
-            CreatePlayerRequest.builder().nickname("hopondeadlock@gmail.com").build());
+    PlayerResponse response =
+        playerService.createPlayer(CreatePlayerRequest.builder().nickname("hopondeadlock").build());
 
     mockMvc
         .perform(get("/players"))
@@ -46,10 +45,10 @@ public class PlayerControllerIT extends ITBase {
             post("/players/register")
                 .content(
                     """
-                    {
-                      "nickname": null
-                    }
-                    """)
+                                    {
+                                      "nickname": null
+                                    }
+                                    """)
                 .contentType(APPLICATION_JSON))
         .andExpectAll(
             status().isBadRequest(),

@@ -1,6 +1,7 @@
 package com.emt.controller;
 
 import com.emt.model.request.CreateMatchRequest;
+import com.emt.model.request.CreatePlayerRequest;
 import com.emt.model.response.MatchResponse;
 import com.emt.service.MatchService;
 import jakarta.validation.Valid;
@@ -22,7 +23,7 @@ public class MatchController {
   public String getAllMatches(Model model) {
     List<MatchResponse> matches = matchService.getAllMatches();
     model.addAttribute("matches", matches);
-    return "elo-ranking";
+    return "match-history";
   }
 
   @PostMapping("/report")

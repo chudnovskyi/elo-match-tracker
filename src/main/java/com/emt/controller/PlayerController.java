@@ -2,7 +2,7 @@ package com.emt.controller;
 
 import com.emt.model.request.CreateMatchRequest;
 import com.emt.model.request.CreatePlayerRequest;
-import com.emt.model.response.CreatePlayerResponse;
+import com.emt.model.response.PlayerResponse;
 import com.emt.service.PlayerService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -21,7 +21,7 @@ public class PlayerController {
 
   @GetMapping
   public String getAllPlayers(Model model) {
-    List<CreatePlayerResponse> players = playerService.getAllPlayers();
+    List<PlayerResponse> players = playerService.getAllPlayers();
     model.addAttribute("players", players);
     model.addAttribute("playerRequest", CreatePlayerRequest.builder().build());
     model.addAttribute("matchRequest", CreateMatchRequest.builder().build());

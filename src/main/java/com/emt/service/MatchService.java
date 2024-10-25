@@ -24,7 +24,7 @@ public class MatchService {
   }
 
   public MatchResponse createMatch(CreateMatchRequest request) {
-    if (request.winnerId().equals(request.looserId())) {
+    if (request.winnerId().equals(request.loserId())) {
       throw new IdenticalPlayersException("A match cannot be created with identical players.");
     }
 
@@ -33,7 +33,7 @@ public class MatchService {
             req ->
                 matchMapper.mapToEntity(
                     playerService.getReferenceById(req.winnerId()),
-                    playerService.getReferenceById(req.looserId())))
+                    playerService.getReferenceById(req.loserId())))
         .map(matchRepository::save)
         .map(matchMapper::mapToResponse)
         .orElseThrow();
