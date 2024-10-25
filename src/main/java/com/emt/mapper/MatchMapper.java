@@ -11,14 +11,14 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class MatchMapper {
 
-  public Match mapToEntity(Player winner, Player looser) {
-    return Match.builder().winner(winner).looser(looser).createdAt(Instant.now()).build();
+  public Match mapToEntity(Player winner, Player loser) {
+    return Match.builder().winner(winner).loser(loser).createdAt(Instant.now()).build();
   }
 
   public MatchResponse mapToResponse(Match match) {
     return MatchResponse.builder()
         .winnerName(match.getWinner().getNickname())
-        .looserName(match.getLooser().getNickname())
+        .loserName(match.getLoser().getNickname())
         .createdAt(match.getCreatedAt())
         .build();
   }

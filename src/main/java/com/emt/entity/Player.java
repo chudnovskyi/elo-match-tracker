@@ -21,7 +21,6 @@ public class Player {
   private Long playerId;
 
   @NotNull private String nickname;
-  @NotNull private Integer eloRating;
-
-  private Instant registeredAt;
+  @NotNull @Builder.Default private Integer eloRating = 1200;
+  @NotNull private Instant registeredAt;
 }

@@ -12,7 +12,7 @@
                 <a href="/players" class="header-link">Main</a>
             </li>
             <li class="header-item">
-                <a href="/matches/history" class="header-link header-link-active">Match History</a>
+                <a href="/matches" class="header-link header-link-active">Match History</a>
             </li>
         </ul>
     </nav>
@@ -23,17 +23,15 @@
         <thead>
         <tr>
             <th>Date</th>
-            <th>Player 1</th>
-            <th>Player 2</th>
             <th>Winner</th>
+            <th>Loser</th>
         </tr>
         </thead>
         <tbody>
         <tr th:each="match : ${matches}">
-            <td th:text="${#dates.format(match.matchTime, 'yyyy-MM-dd')}">2024-10-05</td>
-            <td th:text="${match.playerOneName}">Player 1</td>
-            <td th:text="${match.playerTwoName}">Player 2</td>
-            <td th:text="${match.winner}">Player 1 Wins</td>
+            <td th:text="${match != null ? #dates.format(match.createdAt, 'yyyy-MM-dd') : 'N/A'}">2024-10-05</td>
+            <td th:text="${match != null ? match.winnerName : 'Player 1'}">Player 1</td>
+            <td th:text="${match != null ? match.loserName : 'Player 2'}">Player 2</td>
         </tr>
         </tbody>
     </table>

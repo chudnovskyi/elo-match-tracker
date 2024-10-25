@@ -14,6 +14,9 @@ java {
     }
 }
 
+jacoco {
+    toolVersion = "0.8.12"
+}
 
 repositories {
     mavenCentral()
@@ -30,8 +33,7 @@ dependencies {
     implementation 'org.springdoc:springdoc-openapi-starter-common:2.3.0'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
-    implementation 'org.flywaydb:flyway-core:10.10.0'
-    implementation 'org.flywaydb:flyway-database-postgresql:10.10.0'
+    implementation 'org.flywaydb:flyway-core'
 
     implementation 'org.projectlombok:lombok:1.18.32'
     annotationProcessor 'org.projectlombok:lombok:1.18.32'
@@ -45,8 +47,8 @@ testing {
             sources { java { srcDirs = ['src/test/unit/java'] } resources { srcDirs = ['src/test/unit/resources'] } }
             dependencies {
                 implementation project()
-
                 implementation 'org.springframework.boot:spring-boot-starter-test'
+                implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
             }
         }
         integration(JvmTestSuite) {
@@ -62,10 +64,10 @@ testing {
                 implementation 'org.testcontainers:mockserver:1.19.0'
                 implementation 'org.testcontainers:junit-jupiter:1.19.0'
 
-                implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.2'
+                implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.0'
 
-                implementation 'org.projectlombok:lombok:1.18.20'
-                annotationProcessor 'org.projectlombok:lombok:1.18.20'
+                implementation 'org.projectlombok:lombok:1.18.32'
+                annotationProcessor 'org.projectlombok:lombok:1.18.32'
             }
         }
         end2end(JvmTestSuite) {
@@ -75,12 +77,26 @@ testing {
 
                 implementation 'org.springframework.boot:spring-boot-starter-test'
 
-                implementation 'org.testcontainers:junit-jupiter:1.17.6'
+                implementation 'org.testcontainers:junit-jupiter:1.19.0'
 
-                implementation "org.projectlombok:lombok:1.18.28"
-                annotationProcessor "org.projectlombok:lombok:1.18.28"
+                implementation "org.projectlombok:lombok:1.18.32"
+                annotationProcessor "org.projectlombok:lombok:1.18.32"
             }
         }
+    }
+}
+
+test {
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
     }
 }
 
@@ -90,10 +106,13 @@ configurations {
     }
 }
 
+tasks.named('integration') {
+    finalizedBy jacocoTestReport
+}
+
 tasks.named('end2end') {
-    dependsOn {
-        jibDockerBuild
-    }
+    dependsOn jibDockerBuild
+    finalizedBy jacocoTestReport
 }
 
 jib {

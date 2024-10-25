@@ -2,7 +2,7 @@ package com.emt.mapper;
 
 import com.emt.entity.Player;
 import com.emt.model.request.CreatePlayerRequest;
-import com.emt.model.response.CreatePlayerResponse;
+import com.emt.model.response.PlayerResponse;
 import java.time.Instant;
 import org.springframework.stereotype.Component;
 
@@ -16,8 +16,8 @@ public class PlayerMapper {
         .build();
   }
 
-  public CreatePlayerResponse mapToResponse(Player player) {
-    return CreatePlayerResponse.builder()
+  public PlayerResponse mapToResponse(Player player) {
+    return PlayerResponse.builder()
         .playerId(player.getPlayerId())
         .nickname(player.getNickname())
         .eloRating(player.getEloRating())

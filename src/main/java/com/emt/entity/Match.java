@@ -4,6 +4,8 @@ import static jakarta.persistence.FetchType.LAZY;
 
 import jakarta.persistence.*;
 import java.time.Instant;
+
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,8 +28,8 @@ public class Match {
   private Player winner;
 
   @ManyToOne(fetch = LAZY)
-  @JoinColumn(name = "looser_id")
-  private Player looser;
+  @JoinColumn(name = "loser_id")
+  private Player loser;
 
-  private Instant createdAt;
+  @NotNull private Instant createdAt;
 }
