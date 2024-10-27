@@ -8,9 +8,11 @@ import com.emt.model.response.PlayerResponse;
 import com.emt.repository.PlayerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 
@@ -19,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
+@ExtendWith(MockitoExtension.class)
 class PlayerServiceTest {
 
   private static final String NICKNAME = "topOneDeadlocker";
@@ -27,13 +30,8 @@ class PlayerServiceTest {
   @Mock private PlayerMapper playerMapper;
   @InjectMocks private PlayerService playerService;
 
-  @BeforeEach
-  void setUp() {
-    MockitoAnnotations.openMocks(this);
-  }
-
   @Test
-  void createPlayer_ShouldCreateNewPlayer_WhenPlayerDoesNotExist() {
+  void createPlayer_WhenPlayerDoesNotExist_ShouldCreateNewPlayer() {
     CreatePlayerRequest request = CreatePlayerRequest.builder().nickname(NICKNAME).build();
     Player player = new Player(1L, NICKNAME, 2500, Instant.now());
     PlayerResponse expectedResponse =
@@ -56,7 +54,7 @@ class PlayerServiceTest {
   }
 
   @Test
-  void createPlayer_ShouldThrowException_WhenPlayerAlreadyExists() {
+  void createPlayer_WhenPlayerAlreadyExists_ShouldThrowException() {
     CreatePlayerRequest request = CreatePlayerRequest.builder().nickname(NICKNAME).build();
 
     given(playerRepository.existsByNickname(request.nickname())).willReturn(true);
