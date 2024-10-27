@@ -9,9 +9,11 @@ import com.emt.model.response.MatchResponse;
 import com.emt.repository.MatchRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 
@@ -20,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
+@ExtendWith(MockitoExtension.class)
 class MatchServiceTest {
 
   @Mock private PlayerService playerService;
@@ -30,14 +33,9 @@ class MatchServiceTest {
 
   @InjectMocks private MatchService matchService;
 
-  @BeforeEach
-  void setUp() {
-    MockitoAnnotations.openMocks(this);
-  }
-
   @Test
   @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-  void createMatch_ShouldThrowException_WhenWinnerAndLoserAreIdentical() {
+  void createMatch_WhenWinnerAndLoserAreIdentical_ShouldThrowException() {
     CreateMatchRequest request = CreateMatchRequest.builder().winnerId(1L).loserId(1L).build();
 
     assertThatThrownBy(() -> matchService.createMatch(request))
@@ -46,7 +44,7 @@ class MatchServiceTest {
   }
 
   @Test
-  void createMatch_ShouldCreateMatchSuccessfully_WhenPlayersAreDifferent() {
+  void createMatch_WhenPlayersAreDifferent_ShouldCreateMatchSuccessfully() {
     CreateMatchRequest request = CreateMatchRequest.builder().winnerId(1L).loserId(2L).build();
 
     Player winner = new Player(1L, "WinnerPlayer", 2500, Instant.now());

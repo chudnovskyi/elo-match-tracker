@@ -1,5 +1,4 @@
 # temporary solution, while k8s is not configured
-version: '3.8'
 services:
   postgres:
     container_name: postgres_container_emt

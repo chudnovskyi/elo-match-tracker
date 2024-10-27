@@ -6,4 +6,5 @@ import java.time.Instant;
 
 @Builder
 public record PlayerResponse(
-    Long playerId, String nickname, Integer eloRating, Instant registeredAt) {}
+        Long playerId, String nickname, Integer eloRating, Instant registeredAt) {
+}
