@@ -7,13 +7,12 @@ import com.emt.model.exception.PlayerNotFoundException;
 import com.emt.model.request.CreatePlayerRequest;
 import com.emt.model.response.PlayerResponse;
 import com.emt.repository.PlayerRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -43,8 +42,8 @@ public class PlayerService {
                 .orElseThrow();
     }
 
-    public Player getReferenceById(Long playerId) {
-        return Optional.of(playerRepository.getReferenceById(playerId))
+    public Player getPlayerById(Long playerId) {
+        return playerRepository.findById(playerId)
                 .orElseThrow(() -> new PlayerNotFoundException(playerId));
     }
 }

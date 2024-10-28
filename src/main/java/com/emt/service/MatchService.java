@@ -8,7 +8,7 @@ import com.emt.model.response.MatchResponse;
 import com.emt.repository.MatchRepository;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Stream;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,16 +34,15 @@ public class MatchService {
             throw new IdenticalPlayersException("A match cannot be created with identical players.");
         }
 
-        return Optional.of(request)
-                .map(req -> List.of(
-                        playerService.getReferenceById(req.winnerId()),
-                        playerService.getReferenceById(req.loserId())))
-                .map(players -> {
-                    updateEloRatings(players.get(0), players.get(1), 1.0);
-                    return matchMapper.mapToEntity(players.get(0), players.get(1));
-                })
+        Player winner = playerService.getPlayerById(request.winnerId());
+        Player loser = playerService.getPlayerById(request.loserId());
+
+        updateEloRatings(winner, loser);
+
+        return Stream.of(matchMapper.mapToEntity(winner, loser))
                 .map(matchRepository::save)
                 .map(matchMapper::mapToResponse)
+                .findFirst()
                 .orElseThrow();
     }
 
@@ -51,11 +50,11 @@ public class MatchService {
         return 1.0 / (1 + Math.pow(10, (rating1 - rating2) / 400.0));
     }
 
-    public void updateEloRatings(Player winner, Player loser, double outcome) {
+    public void updateEloRatings(Player winner, Player loser) {
         double probabilityLoser = calculateProbability(winner.getEloRating(), loser.getEloRating());
         double probabilityWinner = calculateProbability(loser.getEloRating(), winner.getEloRating());
 
-        winner.setEloRating((int) (winner.getEloRating() + CONSTANT_K * (outcome - probabilityWinner)));
-        loser.setEloRating((int) (loser.getEloRating() + CONSTANT_K * ((1 - outcome) - probabilityLoser)));
+        winner.setEloRating((int) (winner.getEloRating() + CONSTANT_K * (1.0 - probabilityWinner)));
+        loser.setEloRating((int) (loser.getEloRating() + CONSTANT_K * (0.0 - probabilityLoser)));
     }
 }
