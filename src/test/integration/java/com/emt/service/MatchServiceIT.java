@@ -51,12 +51,10 @@ public class MatchServiceIT extends ITBase {
 
         matchService.createMatch(new CreateMatchRequest(firstPlayer.playerId(), secondPlayer.playerId()));
 
-        Player updatedFirstPlayer = playerService.getReferenceById(firstPlayer.playerId());
-        Player updatedSecondPlayer = playerService.getReferenceById(secondPlayer.playerId());
+        Player updatedFirstPlayer = playerService.getPlayerById(firstPlayer.playerId());
+        Player updatedSecondPlayer = playerService.getPlayerById(secondPlayer.playerId());
 
         assertThat(updatedFirstPlayer.getEloRating()).isGreaterThan(initialRatingFirstPlayer);
         assertThat(updatedSecondPlayer.getEloRating()).isLessThan(initialRatingSecondPlayer);
-        assertThat(updatedFirstPlayer.getEloRating()).isNotEqualTo(initialRatingFirstPlayer);
-        assertThat(updatedSecondPlayer.getEloRating()).isNotEqualTo(initialRatingSecondPlayer);
     }
 }

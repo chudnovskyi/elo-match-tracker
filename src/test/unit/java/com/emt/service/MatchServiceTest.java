@@ -7,12 +7,12 @@ import com.emt.model.exception.IdenticalPlayersException;
 import com.emt.model.request.CreateMatchRequest;
 import com.emt.model.response.MatchResponse;
 import com.emt.repository.MatchRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
@@ -25,43 +25,74 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class MatchServiceTest {
 
-  @Mock private PlayerService playerService;
+    private static final int CONSTANT_K = 30;
 
-  @Mock private MatchRepository matchRepository;
+    @Mock
+    private PlayerService playerService;
 
-  @Mock private MatchMapper matchMapper;
+    @Mock
+    private MatchRepository matchRepository;
 
-  @InjectMocks private MatchService matchService;
+    @Mock
+    private MatchMapper matchMapper;
 
-  @Test
-  @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-  void createMatch_WhenWinnerAndLoserAreIdentical_ShouldThrowException() {
-    CreateMatchRequest request = CreateMatchRequest.builder().winnerId(1L).loserId(1L).build();
+    @InjectMocks
+    private MatchService matchService;
 
-    assertThatThrownBy(() -> matchService.createMatch(request))
-        .isInstanceOf(IdenticalPlayersException.class)
-        .hasMessageContaining("A match cannot be created with identical players.");
-  }
+    @Test
+    @SuppressWarnings("PMD.AvoidDuplicateLiterals")
+    void createMatch_WhenWinnerAndLoserAreIdentical_ShouldThrowException() {
+        CreateMatchRequest request = CreateMatchRequest.builder().winnerId(1L).loserId(1L).build();
 
-  @Test
-  void createMatch_WhenPlayersAreDifferent_ShouldCreateMatchSuccessfully() {
-    CreateMatchRequest request = CreateMatchRequest.builder().winnerId(1L).loserId(2L).build();
+        assertThatThrownBy(() -> matchService.createMatch(request))
+                .isInstanceOf(IdenticalPlayersException.class)
+                .hasMessageContaining("A match cannot be created with identical players.");
+    }
 
-    Player winner = new Player(1L, "WinnerPlayer", 2500, Instant.now());
-    Player loser = new Player(2L, "LoserPlayer", 2000, Instant.now());
-    Match match = new Match();
-    MatchResponse expectedResponse =
-        new MatchResponse("WinnerPlayer", "LoserPlayer", Instant.now());
+    @Test
+    void createMatch_WhenPlayersAreDifferent_ShouldCreateMatchSuccessfully() {
+        CreateMatchRequest request = CreateMatchRequest.builder().winnerId(1L).loserId(2L).build();
 
-    given(playerService.getReferenceById(1L)).willReturn(winner);
-    given(playerService.getReferenceById(2L)).willReturn(loser);
-    given(matchMapper.mapToEntity(winner, loser)).willReturn(match);
-    given(matchRepository.save(match)).willReturn(match);
-    given(matchMapper.mapToResponse(match)).willReturn(expectedResponse);
+        Player winner = new Player(1L, "WinnerPlayer", 2500, Instant.now());
+        Player loser = new Player(2L, "LoserPlayer", 2000, Instant.now());
+        Match match = new Match();
+        MatchResponse expectedResponse =
+                new MatchResponse("WinnerPlayer", "LoserPlayer", Instant.now());
 
-    MatchResponse actualResponse = matchService.createMatch(request);
+        given(playerService.getPlayerById(1L)).willReturn(winner);
+        given(playerService.getPlayerById(2L)).willReturn(loser);
+        given(matchMapper.mapToEntity(winner, loser)).willReturn(match);
+        given(matchRepository.save(match)).willReturn(match);
+        given(matchMapper.mapToResponse(match)).willReturn(expectedResponse);
 
-    assertThat(actualResponse).isEqualTo(expectedResponse);
-    verify(matchRepository).save(match);
-  }
+        MatchResponse actualResponse = matchService.createMatch(request);
+
+        assertThat(actualResponse).isEqualTo(expectedResponse);
+        verify(matchRepository).save(match);
+    }
+
+    @ParameterizedTest(name = "[{index}] Calculate correctly Elo-Ranking between two players with winner rating {0} and loser rating {1}.")
+    @CsvSource({
+            "1200, 1100",
+            "1200, 1250",
+            "1300, 1200",
+            "1500, 1200",
+            "1200, 1000"
+    })
+    void calculateCorrectlyPlayersEloRating_WhenPlayersAreDifferent_ShouldCalculateCorrectlyEloRating(int winnerRating, int loserRating) {
+        Player winner = new Player(1L, "WinnerPlayer", winnerRating, Instant.now());
+        Player loser = new Player(2L, "LoserPlayer", loserRating, Instant.now());
+
+        matchService.updateEloRatings(winner, loser);
+
+        double probabilityWinner = MatchService.calculateProbability(loserRating, winnerRating);
+        double probabilityLoser = MatchService.calculateProbability(winnerRating, loserRating);
+
+        int expectedWinnerRating = (int) (winnerRating + CONSTANT_K * (1.0 - probabilityWinner));
+        int expectedLoserRating = (int) (loserRating + CONSTANT_K * (0.0 - probabilityLoser));
+
+        assertThat(winner.getEloRating()).isEqualTo(expectedWinnerRating);
+        assertThat(loser.getEloRating()).isEqualTo(expectedLoserRating);
+    }
+
 }
