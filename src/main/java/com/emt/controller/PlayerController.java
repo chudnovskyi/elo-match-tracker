@@ -21,24 +21,24 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PlayerController {
 
-    private final PlayerService playerService;
+  private final PlayerService playerService;
 
-    @GetMapping
-    public String getAllPlayers(Model model) {
-        List<PlayerResponse> players = playerService.getAllPlayers();
-        model.addAttribute("players", players);
-        model.addAttribute("playerRequest", CreatePlayerRequest.builder().build());
-        model.addAttribute("matchRequest", CreateMatchRequest.builder().build());
-        return "elo-ranking";
-    }
+  @GetMapping
+  public String getAllPlayers(Model model) {
+    List<PlayerResponse> players = playerService.getAllPlayers();
+    model.addAttribute("players", players);
+    model.addAttribute("playerRequest", CreatePlayerRequest.builder().build());
+    model.addAttribute("matchRequest", CreateMatchRequest.builder().build());
+    return "elo-ranking";
+  }
 
-    @PostMapping("/register")
-    public String createPlayer(
-            @Valid @ModelAttribute("playerRequest") CreatePlayerRequest playerRequest,
-            RedirectAttributes redirectAttributes) {
+  @PostMapping("/register")
+  public String createPlayer(
+      @Valid @ModelAttribute("playerRequest") CreatePlayerRequest playerRequest,
+      RedirectAttributes redirectAttributes) {
 
-        playerService.createPlayer(playerRequest);
-        redirectAttributes.addFlashAttribute("message", "Player added successfully!");
-        return "redirect:/players";
-    }
+    playerService.createPlayer(playerRequest);
+    redirectAttributes.addFlashAttribute("message", "Player added successfully!");
+    return "redirect:/players";
+  }
 }

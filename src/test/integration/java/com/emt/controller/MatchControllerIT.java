@@ -9,11 +9,10 @@ import com.emt.ITBase;
 import com.emt.model.request.CreatePlayerRequest;
 import com.emt.model.response.PlayerResponse;
 import com.emt.service.PlayerService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 public class MatchControllerIT extends ITBase {

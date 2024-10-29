@@ -2,12 +2,11 @@ package com.emt.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.Instant;
 
 @Data
 @Builder
@@ -17,17 +16,13 @@ import java.time.Instant;
 @Table(name = "player")
 public class Player {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long playerId;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long playerId;
 
-    @NotNull
-    private String nickname;
+  @NotNull private String nickname;
 
-    @NotNull
-    @Builder.Default
-    private Integer eloRating = 1200;
+  @NotNull @Builder.Default private Integer eloRating = 1200;
 
-    @NotNull
-    private Instant registeredAt;
+  @NotNull private Instant registeredAt;
 }

@@ -3,9 +3,8 @@ package com.emt.entity;
 import static jakarta.persistence.FetchType.LAZY;
 
 import jakarta.persistence.*;
-import java.time.Instant;
-
 import jakarta.validation.constraints.NotNull;
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
