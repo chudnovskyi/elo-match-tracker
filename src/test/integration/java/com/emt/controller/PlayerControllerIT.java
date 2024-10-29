@@ -19,7 +19,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 public class PlayerControllerIT extends ITBase {
 
   private final MockMvc mockMvc;
-
   private final PlayerService playerService;
 
   @Test

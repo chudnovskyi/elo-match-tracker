@@ -1,25 +1,22 @@
 package com.emt.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+
 import com.emt.entity.Player;
 import com.emt.mapper.PlayerMapper;
 import com.emt.model.exception.PlayerAlreadyExistsException;
 import com.emt.model.request.CreatePlayerRequest;
 import com.emt.model.response.PlayerResponse;
 import com.emt.repository.PlayerRepository;
-import org.junit.jupiter.api.BeforeEach;
+import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.Instant;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class PlayerServiceTest {

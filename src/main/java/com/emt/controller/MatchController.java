@@ -20,22 +20,22 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MatchController {
 
-    private final MatchService matchService;
+  private final MatchService matchService;
 
-    @GetMapping
-    public String getAllMatches(Model model) {
-        List<MatchResponse> matches = matchService.getAllMatches();
-        model.addAttribute("matches", matches);
-        return "match-history";
-    }
+  @GetMapping
+  public String getAllMatches(Model model) {
+    List<MatchResponse> matches = matchService.getAllMatches();
+    model.addAttribute("matches", matches);
+    return "match-history";
+  }
 
-    @PostMapping("/report")
-    public String reportMatch(
-            @Valid @ModelAttribute CreateMatchRequest matchRequest,
-            RedirectAttributes redirectAttributes) {
+  @PostMapping("/report")
+  public String reportMatch(
+      @Valid @ModelAttribute CreateMatchRequest matchRequest,
+      RedirectAttributes redirectAttributes) {
 
-        matchService.createMatch(matchRequest);
-        redirectAttributes.addFlashAttribute("message", "Match reported successfully!");
-        return "redirect:/players";
-    }
+    matchService.createMatch(matchRequest);
+    redirectAttributes.addFlashAttribute("message", "Match reported successfully!");
+    return "redirect:/players";
+  }
 }
