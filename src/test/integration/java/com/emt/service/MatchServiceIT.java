@@ -9,6 +9,7 @@ import com.emt.model.request.CreateMatchRequest;
 import com.emt.model.request.CreatePlayerRequest;
 import com.emt.model.response.MatchResponse;
 import com.emt.model.response.PlayerResponse;
+import java.math.BigDecimal;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
@@ -44,8 +45,8 @@ public class MatchServiceIT extends ITBase {
     PlayerResponse secondPlayer =
         playerService.createPlayer(CreatePlayerRequest.builder().nickname("Loser").build());
 
-    int initialRatingFirstPlayer = firstPlayer.eloRating();
-    int initialRatingSecondPlayer = secondPlayer.eloRating();
+    BigDecimal initialRatingFirstPlayer = firstPlayer.eloRating();
+    BigDecimal initialRatingSecondPlayer = secondPlayer.eloRating();
 
     matchService.createMatch(
         new CreateMatchRequest(firstPlayer.playerId(), secondPlayer.playerId()));
