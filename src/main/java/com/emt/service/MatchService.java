@@ -6,6 +6,9 @@ import com.emt.model.exception.IdenticalPlayersException;
 import com.emt.model.request.CreateMatchRequest;
 import com.emt.model.response.MatchResponse;
 import com.emt.repository.MatchRepository;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -15,14 +18,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class MatchService {
 
-  private static final int CONSTANT_K = 30;
+  private static final BigDecimal CONSTANT_K = new BigDecimal("30");
   private final MatchRepository matchRepository;
   private final MatchMapper matchMapper;
   private final PlayerService playerService;
-
-  public static double calculateProbability(int rating1, int rating2) {
-    return 1.0 / (1 + Math.pow(10, (rating1 - rating2) / 400.0));
-  }
 
   public List<MatchResponse> getAllMatches() {
     return matchRepository.findAll().stream().map(matchMapper::mapToResponse).toList();
@@ -45,10 +44,34 @@ public class MatchService {
   }
 
   public void updateEloRatings(Player winner, Player loser) {
-    double probabilityLoser = calculateProbability(winner.getEloRating(), loser.getEloRating());
-    double probabilityWinner = calculateProbability(loser.getEloRating(), winner.getEloRating());
+    BigDecimal probabilityWinner =
+        calculateProbability(winner.getEloRating(), loser.getEloRating());
+    BigDecimal probabilityLoser = calculateProbability(loser.getEloRating(), winner.getEloRating());
 
-    winner.setEloRating((int) (winner.getEloRating() + CONSTANT_K * (1.0 - probabilityWinner)));
-    loser.setEloRating((int) (loser.getEloRating() + CONSTANT_K * (0.0 - probabilityLoser)));
+    BigDecimal winnerNewRating =
+        winner
+            .getEloRating()
+            .add(CONSTANT_K.multiply(BigDecimal.ONE.subtract(probabilityWinner)))
+            .setScale(0, RoundingMode.HALF_UP);
+
+    BigDecimal loserNewRating =
+        loser
+            .getEloRating()
+            .add(CONSTANT_K.multiply(BigDecimal.ZERO.subtract(probabilityLoser)))
+            .setScale(0, RoundingMode.HALF_UP);
+
+    winner.setEloRating(winnerNewRating);
+    loser.setEloRating(loserNewRating);
+  }
+
+  public BigDecimal calculateProbability(BigDecimal rating1, BigDecimal rating2) {
+    double exponent =
+        rating2
+            .subtract(rating1)
+            .divide(new BigDecimal("400"), MathContext.DECIMAL128)
+            .doubleValue();
+    BigDecimal divisor = BigDecimal.ONE.add(new BigDecimal(Math.pow(10, exponent)));
+
+    return BigDecimal.ONE.divide(divisor, 10, RoundingMode.HALF_UP);
   }
 }

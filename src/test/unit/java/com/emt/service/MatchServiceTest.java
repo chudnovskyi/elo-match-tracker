@@ -2,7 +2,6 @@ package com.emt.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.AssertionsForClassTypes.within;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -13,6 +12,7 @@ import com.emt.model.exception.IdenticalPlayersException;
 import com.emt.model.request.CreateMatchRequest;
 import com.emt.model.response.MatchResponse;
 import com.emt.repository.MatchRepository;
+import java.math.BigDecimal;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class MatchServiceTest {
 
-  private static final int CONSTANT_K = 30;
+  private static final BigDecimal CONSTANT_K = new BigDecimal("30");
 
   @Mock private PlayerService playerService;
 
@@ -49,8 +49,8 @@ class MatchServiceTest {
   void createMatch_WhenPlayersAreDifferent_ShouldCreateMatchSuccessfully() {
     CreateMatchRequest request = CreateMatchRequest.builder().winnerId(1L).loserId(2L).build();
 
-    Player winner = new Player(1L, "WinnerPlayer", 2500, Instant.now());
-    Player loser = new Player(2L, "LoserPlayer", 2000, Instant.now());
+    Player winner = new Player(1L, "WinnerPlayer", new BigDecimal("2500"), Instant.now());
+    Player loser = new Player(2L, "LoserPlayer", new BigDecimal("2000"), Instant.now());
     Match match = new Match();
     MatchResponse expectedResponse =
         new MatchResponse("WinnerPlayer", "LoserPlayer", Instant.now());
@@ -69,7 +69,7 @@ class MatchServiceTest {
 
   @ParameterizedTest(
       name =
-          "[{index}] Calculate correctly Elo-Ranking between two players with winner rating {0} and loser rating {1}, expected rating change {2}.")
+          "[{index}] Calculate Elo-Ranking for winner rating {0} and loser rating {1}, expected rating change {2}")
   @CsvSource({
     "1200, 1100, 11",
     "1200, 1250, 17",
@@ -78,23 +78,18 @@ class MatchServiceTest {
     "1200, 1000, 7"
   })
   void calculateCorrectlyPlayersEloRating_WhenPlayersAreDifferent_ShouldCalculateCorrectlyEloRating(
-      int winnerRating, int loserRating, int ratingChange) {
-    Player winner = new Player(1L, "WinnerPlayer", winnerRating, Instant.now());
-    Player loser = new Player(2L, "LoserPlayer", loserRating, Instant.now());
+      String winnerRatingStr, String loserRatingStr, String expectedChangeStr) {
+    BigDecimal initialWinnerRating = new BigDecimal(winnerRatingStr);
+    BigDecimal initialLoserRating = new BigDecimal(loserRatingStr);
+    BigDecimal expectedRatingChange = new BigDecimal(expectedChangeStr);
+
+    Player winner = new Player(1L, "WinnerPlayer", initialWinnerRating, Instant.now());
+    Player loser = new Player(2L, "LoserPlayer", initialLoserRating, Instant.now());
 
     matchService.updateEloRatings(winner, loser);
 
-    double probabilityWinner = 1.0 / (1.0 + Math.pow(10, (loserRating - winnerRating) / 400.0));
-    double probabilityLoser = 1.0 / (1.0 + Math.pow(10, (winnerRating - loserRating) / 400.0));
+    BigDecimal actualRatingChange = winner.getEloRating().subtract(initialWinnerRating).abs();
 
-    int expectedWinnerRating =
-        (int) Math.round(winnerRating + CONSTANT_K * (1.0 - probabilityWinner));
-    int expectedLoserRating = (int) Math.round(loserRating + CONSTANT_K * (0.0 - probabilityLoser));
-    int calculatedRatingChange = expectedWinnerRating - winnerRating;
-
-    assertThat(winner.getEloRating()).isCloseTo(expectedWinnerRating, within(1));
-    assertThat(loser.getEloRating()).isCloseTo(expectedLoserRating, within(1));
-
-    assertThat(calculatedRatingChange).isCloseTo(ratingChange, within(1));
+    assertThat(actualRatingChange).isEqualByComparingTo(expectedRatingChange);
   }
 }

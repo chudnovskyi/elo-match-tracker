@@ -11,6 +11,7 @@ import com.emt.model.exception.PlayerAlreadyExistsException;
 import com.emt.model.request.CreatePlayerRequest;
 import com.emt.model.response.PlayerResponse;
 import com.emt.repository.PlayerRepository;
+import java.math.BigDecimal;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,13 +31,13 @@ class PlayerServiceTest {
   @Test
   void createPlayer_WhenPlayerDoesNotExist_ShouldCreateNewPlayer() {
     CreatePlayerRequest request = CreatePlayerRequest.builder().nickname(NICKNAME).build();
-    Player player = new Player(1L, NICKNAME, 2500, Instant.now());
+    Player player = new Player(1L, NICKNAME, new BigDecimal("2500"), Instant.now());
     PlayerResponse expectedResponse =
         PlayerResponse.builder()
             .playerId(1L)
             .nickname(NICKNAME)
-            .eloRating(2500)
-            .registeredAt(Instant.now())
+            .eloRating(new BigDecimal("2500"))
+            .registeredAt(player.getRegisteredAt())
             .build();
 
     given(playerRepository.existsByNickname(request.nickname())).willReturn(false);
@@ -46,7 +47,7 @@ class PlayerServiceTest {
 
     PlayerResponse actualResponse = playerService.createPlayer(request);
 
-    assertThat(actualResponse).isEqualTo(expectedResponse);
+    assertThat(actualResponse).usingRecursiveComparison().isEqualTo(expectedResponse);
     verify(playerRepository).save(player);
   }
 
