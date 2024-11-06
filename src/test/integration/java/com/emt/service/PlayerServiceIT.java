@@ -8,6 +8,7 @@ import com.emt.mapper.PlayerMapper;
 import com.emt.model.request.CreatePlayerRequest;
 import com.emt.model.response.PlayerResponse;
 import com.emt.repository.PlayerRepository;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -25,9 +26,9 @@ public class PlayerServiceIT extends ITBase {
   @BeforeEach
   public void setUp() {
     playerRepository.deleteAll();
-    playerRepository.save(new Player(1L, "Player1", 1500, Instant.now()));
-    playerRepository.save(new Player(2L, "Player2", 1800, Instant.now()));
-    playerRepository.save(new Player(3L, "Player3", 1700, Instant.now()));
+    playerRepository.save(new Player(1L, "Player1", new BigDecimal("1500"), Instant.now()));
+    playerRepository.save(new Player(2L, "Player2", new BigDecimal("1800"), Instant.now()));
+    playerRepository.save(new Player(3L, "Player3", new BigDecimal("1700"), Instant.now()));
   }
 
   @Test
@@ -39,9 +40,9 @@ public class PlayerServiceIT extends ITBase {
     assertThat(players.get(1).nickname()).isEqualTo("Player3");
     assertThat(players.get(2).nickname()).isEqualTo("Player1");
 
-    assertThat(players.get(0).eloRating()).isEqualTo(1800);
-    assertThat(players.get(1).eloRating()).isEqualTo(1700);
-    assertThat(players.get(2).eloRating()).isEqualTo(1500);
+    assertThat(players.get(0).eloRating()).isEqualTo("1800");
+    assertThat(players.get(1).eloRating()).isEqualTo("1700");
+    assertThat(players.get(2).eloRating()).isEqualTo("1500");
   }
 
   @Test
@@ -55,7 +56,11 @@ public class PlayerServiceIT extends ITBase {
     Player savedPlayer = playerRepository.findById(actualPlayer.playerId()).orElseThrow();
 
     Player expectedPlayer =
-        new Player(savedPlayer.getPlayerId(), NICKNAME, 1200, savedPlayer.getRegisteredAt());
+        new Player(
+            savedPlayer.getPlayerId(),
+            NICKNAME,
+            new BigDecimal("1200"),
+            savedPlayer.getRegisteredAt());
     PlayerResponse expectedResponse = playerMapper.mapToResponse(expectedPlayer);
 
     assertThat(savedPlayer.getNickname()).isEqualTo(expectedPlayer.getNickname());

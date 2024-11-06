@@ -23,7 +23,7 @@ public class PlayerService {
 
   public List<PlayerResponse> getAllPlayers() {
     return playerRepository.findAll().stream()
-        .sorted(Comparator.comparingInt(Player::getEloRating).reversed())
+        .sorted(Comparator.comparing(Player::getEloRating).reversed())
         .map(playerMapper::mapToResponse)
         .toList();
   }
