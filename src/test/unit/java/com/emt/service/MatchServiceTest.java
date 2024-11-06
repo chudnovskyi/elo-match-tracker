@@ -25,8 +25,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class MatchServiceTest {
 
-  private static final BigDecimal CONSTANT_K = new BigDecimal("30");
-
   @Mock private PlayerService playerService;
 
   @Mock private MatchRepository matchRepository;
@@ -71,11 +69,11 @@ class MatchServiceTest {
       name =
           "[{index}] Calculate Elo-Ranking for winner rating {0} and loser rating {1}, expected rating change {2}")
   @CsvSource({
-    "1200, 1100, 11",
-    "1200, 1250, 17",
-    "1300, 1200, 11",
-    "1500, 1200, 5",
-    "1200, 1000, 7"
+    "1200, 1100, 10.80",
+    "1200, 1250, 17.10",
+    "1300, 1200, 10.80",
+    "1500, 1200, 4.50",
+    "1200, 1000, 7.20"
   })
   void calculateCorrectlyPlayersEloRating_WhenPlayersAreDifferent_ShouldCalculateCorrectlyEloRating(
       String winnerRatingStr, String loserRatingStr, String expectedChangeStr) {

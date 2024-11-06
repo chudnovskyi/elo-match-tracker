@@ -52,13 +52,13 @@ public class MatchService {
         winner
             .getEloRating()
             .add(CONSTANT_K.multiply(BigDecimal.ONE.subtract(probabilityWinner)))
-            .setScale(0, RoundingMode.HALF_UP);
+            .setScale(2, RoundingMode.HALF_UP);
 
     BigDecimal loserNewRating =
         loser
             .getEloRating()
             .add(CONSTANT_K.multiply(BigDecimal.ZERO.subtract(probabilityLoser)))
-            .setScale(0, RoundingMode.HALF_UP);
+            .setScale(2, RoundingMode.HALF_UP);
 
     winner.setEloRating(winnerNewRating);
     loser.setEloRating(loserNewRating);
@@ -72,6 +72,8 @@ public class MatchService {
             .doubleValue();
     BigDecimal divisor = BigDecimal.ONE.add(new BigDecimal(Math.pow(10, exponent)));
 
-    return BigDecimal.ONE.divide(divisor, 10, RoundingMode.HALF_UP);
+    return BigDecimal.ONE
+        .divide(divisor, 10, RoundingMode.HALF_UP)
+        .setScale(2, RoundingMode.HALF_UP);
   }
 }
