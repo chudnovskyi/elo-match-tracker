@@ -1,5 +1,6 @@
 package com.emt.service;
 
+import ch.obermuhlner.math.big.BigDecimalMath;
 import com.emt.entity.Player;
 import com.emt.mapper.MatchMapper;
 import com.emt.model.exception.IdenticalPlayersException;
@@ -13,6 +14,12 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import static ch.obermuhlner.math.big.BigDecimalMath.pow;
+import static java.math.BigDecimal.ONE;
+import static java.math.BigDecimal.ZERO;
+import static java.math.MathContext.DECIMAL128;
+import static java.math.RoundingMode.HALF_UP;
 
 @Service
 @RequiredArgsConstructor
@@ -44,36 +51,17 @@ public class MatchService {
   }
 
   public void updateEloRatings(Player winner, Player loser) {
-    BigDecimal probabilityWinner =
-        calculateProbability(winner.getEloRating(), loser.getEloRating());
-    BigDecimal probabilityLoser = calculateProbability(loser.getEloRating(), winner.getEloRating());
+    BigDecimal probabilityWinner = calculateProbability(winner.getEloRating(), loser.getEloRating());
+    BigDecimal winnerRatingGain = CONSTANT_K.multiply(ONE.subtract(probabilityWinner));
 
-    BigDecimal winnerNewRating =
-        winner
-            .getEloRating()
-            .add(CONSTANT_K.multiply(BigDecimal.ONE.subtract(probabilityWinner)))
-            .setScale(2, RoundingMode.HALF_UP);
-
-    BigDecimal loserNewRating =
-        loser
-            .getEloRating()
-            .add(CONSTANT_K.multiply(BigDecimal.ZERO.subtract(probabilityLoser)))
-            .setScale(2, RoundingMode.HALF_UP);
-
-    winner.setEloRating(winnerNewRating);
-    loser.setEloRating(loserNewRating);
+    winner.setEloRating(winner.getEloRating().add(winnerRatingGain));
+    loser.setEloRating(loser.getEloRating().add(winnerRatingGain.negate()));
   }
 
   public BigDecimal calculateProbability(BigDecimal rating1, BigDecimal rating2) {
-    double exponent =
-        rating2
-            .subtract(rating1)
-            .divide(new BigDecimal("400"), MathContext.DECIMAL128)
-            .doubleValue();
-    BigDecimal divisor = BigDecimal.ONE.add(new BigDecimal(Math.pow(10, exponent)));
+    BigDecimal exponent = rating2.subtract(rating1).divide(new BigDecimal("400"), 2, HALF_UP);
+    BigDecimal divisor = ONE.add(pow(new BigDecimal("10"), exponent, DECIMAL128).setScale(2, HALF_UP));
 
-    return BigDecimal.ONE
-        .divide(divisor, 10, RoundingMode.HALF_UP)
-        .setScale(2, RoundingMode.HALF_UP);
+    return ONE.divide(divisor, 2, HALF_UP);
   }
 }

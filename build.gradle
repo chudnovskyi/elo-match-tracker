@@ -33,6 +33,8 @@ dependencies {
     implementation 'org.springdoc:springdoc-openapi-starter-common:2.3.0'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
+    implementation 'ch.obermuhlner:big-math:1.3.0'
+
     implementation 'org.flywaydb:flyway-core'
 
     implementation 'org.projectlombok:lombok:1.18.32'
