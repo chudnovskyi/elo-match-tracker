@@ -2,6 +2,7 @@ package com.emt.entity;
 
 import static jakarta.persistence.FetchType.LAZY;
 
+import com.emt.model.internal.EloRatingChange;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
@@ -31,4 +32,6 @@ public class Match {
   private Player loser;
 
   @NotNull private Instant createdAt;
+
+  @Embedded private EloRatingChange ratingChange;
 }

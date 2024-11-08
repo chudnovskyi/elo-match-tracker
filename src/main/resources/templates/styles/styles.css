@@ -3,7 +3,8 @@ body {
     margin: 20px;
 }
 
-.header-nav {}
+.header-nav {
+}
 
 .header-list {
     display: flex;
@@ -49,23 +50,28 @@ table {
     border-collapse: collapse;
     margin-bottom: 20px;
 }
+
 th, td {
     padding: 8px 12px;
     border: 1px solid #ccc;
     text-align: left;
 }
+
 th {
     background-color: #f4f4f4;
 }
+
 .form-section {
     margin-bottom: 20px;
 }
+
 .form-section input, .form-section select {
     padding: 8px;
     margin-right: 10px;
     margin-bottom: 10px;
     width: 200px;
 }
+
 .form-section button {
     padding: 8px 12px;
     background-color: #4CAF50;
@@ -73,6 +79,29 @@ th {
     border: none;
     cursor: pointer;
 }
+
 .form-section button:hover {
     background-color: #45a049;
 }
+
+.rating-change-box {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-weight: bold;
+}
+
+.positive {
+    background-color: #e0ffe0;
+    color: green;
+    border: 1px solid green;
+}
+
+.negative {
+    background-color: #ffe0e0;
+    color: red;
+    border: 1px solid red;
+}
+

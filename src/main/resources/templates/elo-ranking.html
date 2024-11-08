@@ -47,13 +47,15 @@
             <label for="winner">Winner:</label>
             <select th:field="*{winnerId}" id="winner" required>
                 <option value="" disabled selected>Select Winner</option>
-                <option th:each="player : ${players}" th:value="${player.playerId}" th:text="${player.nickname}"></option>
+                <option th:each="player : ${players}" th:value="${player.playerId}"
+                        th:text="${player.nickname}"></option>
             </select>
 
             <label for="loser">Loser:</label>
             <select th:field="*{loserId}" id="loser" required>
                 <option value="" disabled selected>Select Loser</option>
-                <option th:each="player : ${players}" th:value="${player.playerId}" th:text="${player.nickname}"></option>
+                <option th:each="player : ${players}" th:value="${player.playerId}"
+                        th:text="${player.nickname}"></option>
             </select>
 
             <button type="submit">Submit Match</button>
