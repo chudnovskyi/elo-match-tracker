@@ -9,6 +9,7 @@ import com.emt.entity.Match;
 import com.emt.entity.Player;
 import com.emt.mapper.MatchMapper;
 import com.emt.model.exception.IdenticalPlayersException;
+import com.emt.model.internal.EloRatingChange;
 import com.emt.model.request.CreateMatchRequest;
 import com.emt.model.response.MatchResponse;
 import com.emt.repository.MatchRepository;
@@ -25,16 +26,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class MatchServiceTest {
 
+  private static final BigDecimal CONSTANT_K = new BigDecimal("30");
   @Mock private PlayerService playerService;
-
   @Mock private MatchRepository matchRepository;
-
   @Mock private MatchMapper matchMapper;
-
   @InjectMocks private MatchService matchService;
 
   @Test
-  @SuppressWarnings("PMD.AvoidDuplicateLiterals")
   void createMatch_WhenWinnerAndLoserAreIdentical_ShouldThrowException() {
     CreateMatchRequest request = CreateMatchRequest.builder().winnerId(1L).loserId(1L).build();
 
@@ -49,45 +47,61 @@ class MatchServiceTest {
 
     Player winner = new Player(1L, "WinnerPlayer", new BigDecimal("2500"), Instant.now());
     Player loser = new Player(2L, "LoserPlayer", new BigDecimal("2000"), Instant.now());
+
+    BigDecimal probabilityWinner =
+        matchService.calculateProbability(winner.getEloRating(), loser.getEloRating());
+    BigDecimal winnerRatingGain =
+        CONSTANT_K
+            .multiply(BigDecimal.ONE.subtract(probabilityWinner))
+            .setScale(2, BigDecimal.ROUND_HALF_UP);
+    BigDecimal loserRatingLoss = winnerRatingGain.negate();
+
+    EloRatingChange ratingChange = new EloRatingChange(winnerRatingGain, loserRatingLoss);
     Match match = new Match();
     MatchResponse expectedResponse =
-        new MatchResponse("WinnerPlayer", "LoserPlayer", Instant.now());
+        new MatchResponse("WinnerPlayer", "LoserPlayer", Instant.now(), ratingChange);
 
     given(playerService.getPlayerById(1L)).willReturn(winner);
     given(playerService.getPlayerById(2L)).willReturn(loser);
-    given(matchMapper.mapToEntity(winner, loser)).willReturn(match);
+    given(matchMapper.mapToEntity(winner, loser, ratingChange)).willReturn(match);
     given(matchRepository.save(match)).willReturn(match);
     given(matchMapper.mapToResponse(match)).willReturn(expectedResponse);
 
     MatchResponse actualResponse = matchService.createMatch(request);
 
     assertThat(actualResponse).isEqualTo(expectedResponse);
+    assertThat(actualResponse.ratingChange().winnerRatingChange())
+        .isEqualByComparingTo(ratingChange.winnerRatingChange());
+    assertThat(actualResponse.ratingChange().loserRatingChange())
+        .isEqualByComparingTo(ratingChange.loserRatingChange());
     verify(matchRepository).save(match);
   }
 
   @ParameterizedTest(
-      name =
-          "[{index}] Calculate Elo-Ranking for winner rating {0} and loser rating {1}, expected rating change {2}")
-  @CsvSource({
-    "1200, 1100, 10.80",
-    "1200, 1250, 17.10",
-    "1300, 1200, 10.80",
-    "1500, 1200, 4.50",
-    "1200, 1000, 7.20"
-  })
+      name = "[{index}] Calculate Elo-Ranking for winner rating {0} and loser rating {1}")
+  @CsvSource({"1200, 1100", "1200, 1250", "1300, 1200", "1500, 1200", "1200, 1000"})
   void calculateCorrectlyPlayersEloRating_WhenPlayersAreDifferent_ShouldCalculateCorrectlyEloRating(
-      String winnerRatingStr, String loserRatingStr, String expectedChangeStr) {
+      String winnerRatingStr, String loserRatingStr) {
     BigDecimal initialWinnerRating = new BigDecimal(winnerRatingStr);
     BigDecimal initialLoserRating = new BigDecimal(loserRatingStr);
-    BigDecimal expectedRatingChange = new BigDecimal(expectedChangeStr);
 
     Player winner = new Player(1L, "WinnerPlayer", initialWinnerRating, Instant.now());
     Player loser = new Player(2L, "LoserPlayer", initialLoserRating, Instant.now());
 
-    matchService.updateEloRatings(winner, loser);
+    BigDecimal probabilityWinner =
+        matchService.calculateProbability(winner.getEloRating(), loser.getEloRating());
+    BigDecimal winnerRatingGain =
+        CONSTANT_K
+            .multiply(BigDecimal.ONE.subtract(probabilityWinner))
+            .setScale(2, BigDecimal.ROUND_HALF_UP);
+    BigDecimal loserRatingLoss = winnerRatingGain.negate();
 
-    BigDecimal actualRatingChange = winner.getEloRating().subtract(initialWinnerRating).abs();
+    EloRatingChange expectedRatingChange = new EloRatingChange(winnerRatingGain, loserRatingLoss);
+    EloRatingChange ratingChange = matchService.updateEloRatings(winner, loser);
 
-    assertThat(actualRatingChange).isEqualByComparingTo(expectedRatingChange);
+    assertThat(ratingChange.winnerRatingChange())
+        .isEqualByComparingTo(expectedRatingChange.winnerRatingChange());
+    assertThat(ratingChange.loserRatingChange())
+        .isEqualByComparingTo(expectedRatingChange.loserRatingChange());
   }
 }
