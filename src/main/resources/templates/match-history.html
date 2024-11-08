@@ -1,40 +1,34 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <link rel="stylesheet" href="./styles/styles.css">
     <title>Match History</title>
 </head>
 <body>
-<header>
-    <nav class="header-nav">
-        <ul class="header-list">
-            <li class="header-item">
-                <a href="/players" class="header-link">Main</a>
-            </li>
-            <li class="header-item">
-                <a href="/matches" class="header-link header-link-active">Match History</a>
-            </li>
-        </ul>
-    </nav>
-</header>
-<main>
-    <h1>Match History</h1>
-    <table>
-        <thead>
-        <tr>
-            <th>Date</th>
-            <th>Winner</th>
-            <th>Loser</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="match : ${matches}">
-            <td th:text="${match != null ? #dates.format(match.createdAt, 'yyyy-MM-dd') : 'N/A'}">2024-10-05</td>
-            <td th:text="${match != null ? match.winnerName : 'Player 1'}">Player 1</td>
-            <td th:text="${match != null ? match.loserName : 'Player 2'}">Player 2</td>
-        </tr>
-        </tbody>
-    </table>
-</main>
+<h1>Match History</h1>
+<table>
+    <thead>
+    <tr>
+        <th>Date</th>
+        <th>Winner</th>
+        <th>Loser</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="match : ${matches}">
+        <td th:text="${match.createdAt != null ? #dates.format(match.createdAt, 'yyyy-MM-dd') : 'N/A'}">Date</td>
+        <td>
+            <span th:text="${match.winnerName}">Winner</span>
+            <br/>
+            <span th:text="${match.ratingChange}"></span>
+            <span th:text="${match.ratingChange.winnerRatingChange}"></span>
+        </td>
+        <td>
+            <span th:text="${match.loserName}">Loser</span>
+            <br/>
+            <span th:text="${match.ratingChange.loserRatingChange}"></span>
+        </td>
+    </tr>
+    </tbody>
+</table>
 </body>
 </html>
