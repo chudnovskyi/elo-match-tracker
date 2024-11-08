@@ -78,30 +78,27 @@ class MatchServiceTest {
   }
 
   @ParameterizedTest(
-      name = "[{index}] Calculate Elo-Ranking for winner rating {0} and loser rating {1}")
-  @CsvSource({"1200, 1100", "1200, 1250", "1300, 1200", "1500, 1200", "1200, 1000"})
+      name =
+          "[{index}] Calculate Elo-Ranking for winner rating {0}, loser rating {1}, expected change {2}")
+  @CsvSource({
+    "1200, 1100, 10.80",
+    "1200, 1250, 17.10",
+    "1300, 1200, 10.80",
+    "1500, 1200, 4.50",
+    "1200, 1000, 7.20"
+  })
   void calculateCorrectlyPlayersEloRating_WhenPlayersAreDifferent_ShouldCalculateCorrectlyEloRating(
-      String winnerRatingStr, String loserRatingStr) {
+      String winnerRatingStr, String loserRatingStr, String expectedChangeStr) {
     BigDecimal initialWinnerRating = new BigDecimal(winnerRatingStr);
     BigDecimal initialLoserRating = new BigDecimal(loserRatingStr);
+    BigDecimal expectedChange = new BigDecimal(expectedChangeStr);
 
     Player winner = new Player(1L, "WinnerPlayer", initialWinnerRating, Instant.now());
     Player loser = new Player(2L, "LoserPlayer", initialLoserRating, Instant.now());
 
-    BigDecimal probabilityWinner =
-        matchService.calculateProbability(winner.getEloRating(), loser.getEloRating());
-    BigDecimal winnerRatingGain =
-        CONSTANT_K
-            .multiply(BigDecimal.ONE.subtract(probabilityWinner))
-            .setScale(2, BigDecimal.ROUND_HALF_UP);
-    BigDecimal loserRatingLoss = winnerRatingGain.negate();
-
-    EloRatingChange expectedRatingChange = new EloRatingChange(winnerRatingGain, loserRatingLoss);
     EloRatingChange ratingChange = matchService.updateEloRatings(winner, loser);
 
-    assertThat(ratingChange.winnerRatingChange())
-        .isEqualByComparingTo(expectedRatingChange.winnerRatingChange());
-    assertThat(ratingChange.loserRatingChange())
-        .isEqualByComparingTo(expectedRatingChange.loserRatingChange());
+    assertThat(ratingChange.winnerRatingChange()).isEqualByComparingTo(expectedChange);
+    assertThat(ratingChange.loserRatingChange()).isEqualByComparingTo(expectedChange.negate());
   }
 }
