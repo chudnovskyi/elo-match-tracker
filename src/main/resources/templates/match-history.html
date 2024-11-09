@@ -19,13 +19,12 @@
         <td>
             <span th:text="${match.winnerName}">Winner</span>
             <br/>
-            <span th:text="${match.ratingChange}"></span>
-            <span th:text="${match.ratingChange.winnerRatingChange}"></span>
+            <span th:text="${match.winnerRatingChange()}"></span>
         </td>
         <td>
             <span th:text="${match.loserName}">Loser</span>
             <br/>
-            <span th:text="${match.ratingChange.loserRatingChange}"></span>
+            <span th:text="${-match.winnerRatingChange()}"></span>
         </td>
     </tr>
     </tbody>

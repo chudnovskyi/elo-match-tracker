@@ -9,7 +9,6 @@ import com.emt.entity.Match;
 import com.emt.entity.Player;
 import com.emt.mapper.MatchMapper;
 import com.emt.model.exception.IdenticalPlayersException;
-import com.emt.model.internal.EloRatingChange;
 import com.emt.model.request.CreateMatchRequest;
 import com.emt.model.response.MatchResponse;
 import com.emt.repository.MatchRepository;
@@ -54,26 +53,20 @@ class MatchServiceTest {
         CONSTANT_K
             .multiply(BigDecimal.ONE.subtract(probabilityWinner))
             .setScale(2, BigDecimal.ROUND_HALF_UP);
-    BigDecimal loserRatingLoss = winnerRatingGain.negate();
-
-    EloRatingChange ratingChange = new EloRatingChange(winnerRatingGain, loserRatingLoss);
     Match match = new Match();
     MatchResponse expectedResponse =
-        new MatchResponse("WinnerPlayer", "LoserPlayer", Instant.now(), ratingChange);
+        new MatchResponse("WinnerPlayer", "LoserPlayer", Instant.now(), winnerRatingGain);
 
     given(playerService.getPlayerById(1L)).willReturn(winner);
     given(playerService.getPlayerById(2L)).willReturn(loser);
-    given(matchMapper.mapToEntity(winner, loser, ratingChange)).willReturn(match);
+    given(matchMapper.mapToEntity(winner, loser, winnerRatingGain)).willReturn(match);
     given(matchRepository.save(match)).willReturn(match);
     given(matchMapper.mapToResponse(match)).willReturn(expectedResponse);
 
     MatchResponse actualResponse = matchService.createMatch(request);
 
     assertThat(actualResponse).isEqualTo(expectedResponse);
-    assertThat(actualResponse.ratingChange().winnerRatingChange())
-        .isEqualByComparingTo(ratingChange.winnerRatingChange());
-    assertThat(actualResponse.ratingChange().loserRatingChange())
-        .isEqualByComparingTo(ratingChange.loserRatingChange());
+    assertThat(actualResponse.winnerRatingChange()).isEqualByComparingTo(winnerRatingGain);
     verify(matchRepository).save(match);
   }
 
@@ -96,9 +89,8 @@ class MatchServiceTest {
     Player winner = new Player(1L, "WinnerPlayer", initialWinnerRating, Instant.now());
     Player loser = new Player(2L, "LoserPlayer", initialLoserRating, Instant.now());
 
-    EloRatingChange ratingChange = matchService.updateEloRatings(winner, loser);
+    BigDecimal ratingChange = matchService.updateEloRatings(winner, loser);
 
-    assertThat(ratingChange.winnerRatingChange()).isEqualByComparingTo(expectedChange);
-    assertThat(ratingChange.loserRatingChange()).isEqualByComparingTo(expectedChange.negate());
+    assertThat(ratingChange).isEqualByComparingTo(expectedChange);
   }
 }

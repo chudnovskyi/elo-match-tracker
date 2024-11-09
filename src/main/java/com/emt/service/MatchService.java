@@ -8,7 +8,6 @@ import static java.math.RoundingMode.HALF_UP;
 import com.emt.entity.Player;
 import com.emt.mapper.MatchMapper;
 import com.emt.model.exception.IdenticalPlayersException;
-import com.emt.model.internal.EloRatingChange;
 import com.emt.model.request.CreateMatchRequest;
 import com.emt.model.response.MatchResponse;
 import com.emt.repository.MatchRepository;
@@ -39,15 +38,15 @@ public class MatchService {
     Player winner = playerService.getPlayerById(request.winnerId());
     Player loser = playerService.getPlayerById(request.loserId());
 
-    EloRatingChange ratingChange = updateEloRatings(winner, loser);
+    BigDecimal winnerRatingChange = updateEloRatings(winner, loser);
 
-    return Optional.of(matchMapper.mapToEntity(winner, loser, ratingChange))
+    return Optional.of(matchMapper.mapToEntity(winner, loser, winnerRatingChange))
         .map(matchRepository::save)
         .map(matchMapper::mapToResponse)
         .orElseThrow();
   }
 
-  public EloRatingChange updateEloRatings(Player winner, Player loser) {
+  public BigDecimal updateEloRatings(Player winner, Player loser) {
     BigDecimal probabilityWinner =
         calculateProbability(winner.getEloRating(), loser.getEloRating());
     BigDecimal winnerRatingGain = CONSTANT_K.multiply(ONE.subtract(probabilityWinner));
@@ -56,7 +55,7 @@ public class MatchService {
     winner.setEloRating(winner.getEloRating().add(winnerRatingGain));
     loser.setEloRating(loser.getEloRating().add(loserRatingLoss));
 
-    return new EloRatingChange(winnerRatingGain, loserRatingLoss);
+    return winnerRatingGain;
   }
 
   public BigDecimal calculateProbability(BigDecimal rating1, BigDecimal rating2) {
