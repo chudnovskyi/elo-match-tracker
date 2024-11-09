@@ -2,9 +2,9 @@ package com.emt.entity;
 
 import static jakarta.persistence.FetchType.LAZY;
 
-import com.emt.model.internal.EloRatingChange;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,7 +31,7 @@ public class Match {
   @JoinColumn(name = "loser_id")
   private Player loser;
 
-  @NotNull private Instant createdAt;
+  private BigDecimal winnerRatingChange;
 
-  @Embedded private EloRatingChange ratingChange;
+  @NotNull private Instant createdAt;
 }
