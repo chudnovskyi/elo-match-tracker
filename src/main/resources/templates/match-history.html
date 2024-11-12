@@ -4,6 +4,14 @@
     <title>Match History</title>
 </head>
 <body>
+<nav class="header-nav">
+    <ul class="header-list">
+        <li class="header-item">
+            <a href="/players" class="header-link header-link-active">Main</a>
+        </li>
+    </ul>
+</nav>
+
 <h1>Match History</h1>
 <table>
     <thead>
@@ -25,6 +33,12 @@
             <span th:text="${match.loserName}">Loser</span>
             <br/>
             <span th:text="${-match.winnerRatingChange()}"></span>
+        </td>
+        <td>
+            <form th:action="@{/matches/cancel}" method="post">
+                <input type="hidden" name="matchId" th:value="${match.matchId}"/>
+                <button type="submit">Cancel Match</button>
+            </form>
         </td>
     </tr>
     </tbody>

@@ -5,12 +5,16 @@ import static java.math.BigDecimal.ONE;
 import static java.math.MathContext.DECIMAL128;
 import static java.math.RoundingMode.HALF_UP;
 
+import com.emt.entity.Match;
 import com.emt.entity.Player;
 import com.emt.mapper.MatchMapper;
 import com.emt.model.exception.IdenticalPlayersException;
+import com.emt.model.exception.MatchNotFoundException;
 import com.emt.model.request.CreateMatchRequest;
 import com.emt.model.response.MatchResponse;
 import com.emt.repository.MatchRepository;
+import com.emt.repository.PlayerRepository;
+import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -19,11 +23,13 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class MatchService {
 
   private static final BigDecimal CONSTANT_K = new BigDecimal("30");
   private final MatchRepository matchRepository;
   private final MatchMapper matchMapper;
+  private final PlayerRepository playerRepository;
   private final PlayerService playerService;
 
   public List<MatchResponse> getAllMatches() {
@@ -64,5 +70,24 @@ public class MatchService {
         ONE.add(pow(new BigDecimal("10"), exponent, DECIMAL128).setScale(2, HALF_UP));
 
     return ONE.divide(divisor, 2, HALF_UP);
+  }
+
+  public void cancelMatch(Long matchId) {
+    Match matchToCancel =
+        matchRepository.findById(matchId).orElseThrow(() -> new MatchNotFoundException(matchId));
+
+    recalculateEloRatings(
+        matchToCancel.getWinner(), matchToCancel.getLoser(), matchToCancel.getWinnerRatingChange());
+
+    matchRepository.delete(matchToCancel);
+  }
+
+  private void recalculateEloRatings(Player winner, Player loser, BigDecimal winnerRatingChange) {
+    if (winnerRatingChange != null) {
+      winner.setEloRating(winner.getEloRating().subtract(winnerRatingChange));
+      loser.setEloRating(loser.getEloRating().add(winnerRatingChange));
+    }
+
+    playerRepository.saveAll(List.of(winner, loser));
   }
 }

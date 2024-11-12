@@ -4,16 +4,12 @@ import com.emt.model.request.CreateMatchRequest;
 import com.emt.model.response.MatchResponse;
 import com.emt.service.MatchService;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import java.util.List;
 
 @Controller
 @RequestMapping("/matches")
@@ -37,5 +33,12 @@ public class MatchController {
     matchService.createMatch(matchRequest);
     redirectAttributes.addFlashAttribute("message", "Match reported successfully!");
     return "redirect:/players";
+  }
+
+  @PostMapping("/cancel")
+  public String cancelMatch(@RequestParam Long matchId, RedirectAttributes redirectAttributes) {
+    matchService.cancelMatch(matchId);
+    redirectAttributes.addFlashAttribute("message", "Match cancelled successfully!");
+    return "redirect:/matches";
   }
 }
