@@ -24,6 +24,7 @@ public class MatchMapper {
 
   public MatchResponse mapToResponse(Match match) {
     return MatchResponse.builder()
+        .matchId(match.getMatchId())
         .winnerName(match.getWinner().getNickname())
         .loserName(match.getLoser().getNickname())
         .winnerRatingChange(match.getWinnerRatingChange())
