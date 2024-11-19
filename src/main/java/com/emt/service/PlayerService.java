@@ -45,4 +45,8 @@ public class PlayerService {
         .findById(playerId)
         .orElseThrow(() -> new PlayerNotFoundException(playerId));
   }
+
+  public List<Player> saveWinnerAndLoser(Player winner, Player loser) {
+    return playerRepository.saveAll(List.of(winner, loser));
+  }
 }

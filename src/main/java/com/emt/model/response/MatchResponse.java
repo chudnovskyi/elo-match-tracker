@@ -6,4 +6,8 @@ import lombok.Builder;
 
 @Builder
 public record MatchResponse(
-    Long matchId, String winnerName, String loserName, Instant createdAt, BigDecimal winnerRatingChange) {}
+    Long matchId,
+    String winnerName,
+    String loserName,
+    Instant createdAt,
+    BigDecimal winnerRatingChange) {}
