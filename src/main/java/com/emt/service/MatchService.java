@@ -13,7 +13,6 @@ import com.emt.model.exception.MatchNotFoundException;
 import com.emt.model.request.CreateMatchRequest;
 import com.emt.model.response.MatchResponse;
 import com.emt.repository.MatchRepository;
-import com.emt.repository.PlayerRepository;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
@@ -29,7 +28,6 @@ public class MatchService {
   private static final BigDecimal CONSTANT_K = new BigDecimal("30");
   private final MatchRepository matchRepository;
   private final MatchMapper matchMapper;
-  private final PlayerRepository playerRepository;
   private final PlayerService playerService;
 
   public List<MatchResponse> getAllMatches() {
@@ -76,18 +74,32 @@ public class MatchService {
     Match matchToCancel =
         matchRepository.findById(matchId).orElseThrow(() -> new MatchNotFoundException(matchId));
 
-    recalculateEloRatings(
-        matchToCancel.getWinner(), matchToCancel.getLoser(), matchToCancel.getWinnerRatingChange());
+    Player winner = matchToCancel.getWinner();
+    Player loser = matchToCancel.getLoser();
+    BigDecimal winnerRatingChange = matchToCancel.getWinnerRatingChange();
 
+    winner.setEloRating(winner.getEloRating().subtract(winnerRatingChange));
+    loser.setEloRating(loser.getEloRating().add(winnerRatingChange));
+
+    playerService.saveWinnerAndLoser(winner, loser);
+
+    List<Match> subsequentMatches =
+        matchRepository.findMatchesByPlayersAfter(
+            matchToCancel.getCreatedAt(), winner.getPlayerId(), loser.getPlayerId());
+
+    recalculateEloRatingsForSubsequentMatches(subsequentMatches);
+
+    matchToCancel.setCancelled(true);
     matchRepository.delete(matchToCancel);
   }
 
-  private void recalculateEloRatings(Player winner, Player loser, BigDecimal winnerRatingChange) {
-    if (winnerRatingChange != null) {
-      winner.setEloRating(winner.getEloRating().subtract(winnerRatingChange));
-      loser.setEloRating(loser.getEloRating().add(winnerRatingChange));
-    }
+  private void recalculateEloRatingsForSubsequentMatches(List<Match> matches) {
+    for (Match match : matches) {
+      if (!match.isCancelled())
+        match.getWinner().getEloRating().subtract(match.getWinnerRatingChange());
+      match.getLoser().getEloRating().add(match.getWinnerRatingChange());
 
-    playerRepository.saveAll(List.of(winner, loser));
+      matchRepository.save(match);
+    }
   }
 }

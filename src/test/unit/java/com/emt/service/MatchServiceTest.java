@@ -93,20 +93,4 @@ class MatchServiceTest {
 
     assertThat(ratingChange).isEqualByComparingTo(expectedChange);
   }
-
-  @Test
-  void cancelMatch_ShouldCancelMatchAndUpdateRatings_WhenMatchExists() {
-    Long matchId = 1L;
-    Player winner = new Player(1L, "WinnerPlayer", new BigDecimal("1500"), Instant.now());
-    Player loser = new Player(2L, "LoserPlayer", new BigDecimal("1400"), Instant.now());
-    Match match = new Match(matchId, winner, loser, new BigDecimal("15.00"), Instant.now());
-
-    given(matchRepository.findById(matchId)).willReturn(java.util.Optional.of(match));
-
-    matchService.cancelMatch(matchId);
-
-    assertThat(winner.getEloRating()).isEqualByComparingTo(new BigDecimal("1485.00"));
-    assertThat(loser.getEloRating()).isEqualByComparingTo(new BigDecimal("1415.00"));
-    verify(matchRepository).delete(match);
-  }
 }

@@ -1,3 +1,15 @@
+dbHost: localhost
+dbPort: 5432
 dbName: it_template_db
 dbUsername: it_template_user
 dbPassword: it_template_password
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${dbHost}:${dbPort}/${dbName}
+    username: ${dbUsername}
+    password: ${dbPassword}
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true

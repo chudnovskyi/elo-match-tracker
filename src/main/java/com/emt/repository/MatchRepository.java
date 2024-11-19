@@ -1,8 +1,24 @@
 package com.emt.repository;
 
 import com.emt.entity.Match;
+import java.time.Instant;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-@Repository
-public interface MatchRepository extends JpaRepository<Match, Long> {}
+public interface MatchRepository extends JpaRepository<Match, Long> {
+
+  @Query(
+      """
+          SELECT m
+          FROM Match m
+          WHERE m.createdAt > :createdAt
+            AND (m.winner.playerId IN (:winnerId, :loserId)
+                 OR m.loser.playerId IN (:winnerId, :loserId))
+          """)
+  List<Match> findMatchesByPlayersAfter(
+      @Param("createdAt") Instant createdAt,
+      @Param("winnerId") Long winnerId,
+      @Param("loserId") Long loserId);
+}
