@@ -30,7 +30,7 @@ public class Match {
   @JoinColumn(name = "loser_id")
   private Player loser;
 
-  @JoinColumn(name = "is_cancelled")
+  @Column(name = "is_cancelled")
   private boolean isCancelled;
 
   private BigDecimal winnerRatingChange;
