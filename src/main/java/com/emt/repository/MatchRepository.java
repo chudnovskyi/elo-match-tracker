@@ -11,12 +11,14 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
 
   @Query(
       """
-          SELECT m
-          FROM Match m
-          WHERE m.createdAt > :createdAt
-            AND (m.winner.playerId IN (:winnerId, :loserId)
-                 OR m.loser.playerId IN (:winnerId, :loserId))
-          """)
+              SELECT m
+              FROM Match m
+              WHERE m.createdAt > :createdAt
+                AND m.isCancelled = false
+                AND (m.winner.playerId IN (:winnerId, :loserId)
+                     OR m.loser.playerId IN (:winnerId, :loserId))
+              ORDER BY m.createdAt
+              """)
   List<Match> findMatchesByPlayersAfter(
       @Param("createdAt") Instant createdAt,
       @Param("winnerId") Long winnerId,

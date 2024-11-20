@@ -90,13 +90,12 @@ public class MatchService {
     recalculateEloRatingsForSubsequentMatches(subsequentMatches);
 
     matchToCancel.setCancelled(true);
-    matchRepository.delete(matchToCancel);
+    matchRepository.deleteById(matchId);
   }
 
-  private void recalculateEloRatingsForSubsequentMatches(List<Match> matches) {
+  public void recalculateEloRatingsForSubsequentMatches(List<Match> matches) {
     for (Match match : matches) {
-      if (!match.isCancelled())
-        match.getWinner().getEloRating().subtract(match.getWinnerRatingChange());
+      match.getWinner().getEloRating().subtract(match.getWinnerRatingChange());
       match.getLoser().getEloRating().add(match.getWinnerRatingChange());
 
       matchRepository.save(match);
