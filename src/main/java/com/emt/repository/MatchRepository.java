@@ -14,7 +14,6 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
               SELECT m
               FROM Match m
               WHERE m.createdAt > :createdAt
-                AND m.isCancelled = false
                 AND (m.winner.playerId IN (:winnerId, :loserId)
                      OR m.loser.playerId IN (:winnerId, :loserId))
               ORDER BY m.createdAt

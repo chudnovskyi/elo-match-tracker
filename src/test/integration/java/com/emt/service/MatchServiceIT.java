@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.emt.ITBase;
-import com.emt.entity.Match;
 import com.emt.entity.Player;
 import com.emt.model.exception.MatchNotFoundException;
 import com.emt.model.request.CreateMatchRequest;
@@ -13,9 +12,7 @@ import com.emt.model.request.CreatePlayerRequest;
 import com.emt.model.response.MatchResponse;
 import com.emt.model.response.PlayerResponse;
 import com.emt.repository.MatchRepository;
-import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
@@ -66,28 +63,6 @@ public class MatchServiceIT extends ITBase {
   }
 
   @Test
-  @Transactional
-  public void testCancelMatch_shouldRevertEloRatingsAndRemoveMatch() {
-    PlayerResponse winner =
-        playerService.createPlayer(CreatePlayerRequest.builder().nickname("Winner").build());
-    PlayerResponse loser =
-        playerService.createPlayer(CreatePlayerRequest.builder().nickname("Loser").build());
-
-    BigDecimal initialRatingWinner = winner.eloRating();
-
-    CreateMatchRequest matchRequest = new CreateMatchRequest(winner.playerId(), loser.playerId());
-    MatchResponse matchToCancel = matchService.createMatch(matchRequest);
-
-    matchService.cancelMatch(matchToCancel.matchId());
-
-    Player updatedWinner = playerService.getPlayerById(winner.playerId());
-
-    assertThat(updatedWinner.getEloRating().setScale(2, BigDecimal.ROUND_HALF_UP))
-        .isEqualTo(initialRatingWinner.setScale(2, BigDecimal.ROUND_HALF_UP));
-    assertThat(matchRepository.count()).isZero();
-  }
-
-  @Test
   public void testCancelNonExistentMatch_shouldThrowMatchNotFoundException() {
     Long nonExistentMatchId = 999L;
     MatchNotFoundException exception =
@@ -98,40 +73,40 @@ public class MatchServiceIT extends ITBase {
   }
 
   @Test
-  @Transactional
-  public void testCancelMatch_shouldRevertEloRatingsAndRemoveOneMatch() {
-    PlayerResponse[] players = new PlayerResponse[6];
-    for (int i = 0; i < players.length; i++) {
-      players[i] =
-          playerService.createPlayer(
-              CreatePlayerRequest.builder().nickname("Player" + (i + 1)).build());
-    }
+  public void testCancelMatch_shouldHandleEloReversionAndMatchRemovalInComplexScenario() {
+    PlayerResponse playerOne =
+        playerService.createPlayer(CreatePlayerRequest.builder().nickname("PlayerOne").build());
+    PlayerResponse playerTwo =
+        playerService.createPlayer(CreatePlayerRequest.builder().nickname("PlayerTwo").build());
+    PlayerResponse playerThree =
+        playerService.createPlayer(CreatePlayerRequest.builder().nickname("PlayerThree").build());
+    PlayerResponse playerFour =
+        playerService.createPlayer(CreatePlayerRequest.builder().nickname("PlayerFour").build());
 
-    BigDecimal[] initialRatings = new BigDecimal[players.length];
-    for (int i = 0; i < players.length; i++) {
-      initialRatings[i] = players[i].eloRating();
-    }
+    MatchResponse firstMatch =
+        matchService.createMatch(
+            new CreateMatchRequest(playerOne.playerId(), playerTwo.playerId()));
+    MatchResponse secondMatch =
+        matchService.createMatch(
+            new CreateMatchRequest(playerTwo.playerId(), playerThree.playerId()));
+    MatchResponse thirdMatch =
+        matchService.createMatch(
+            new CreateMatchRequest(playerThree.playerId(), playerFour.playerId()));
 
-    List<MatchResponse> createdMatches = new ArrayList<>();
-    for (int i = 0; i < players.length; i += 2) {
-      CreateMatchRequest matchRequest =
-          new CreateMatchRequest(players[i].playerId(), players[i + 1].playerId());
-      createdMatches.add(matchService.createMatch(matchRequest));
-    }
+    matchService.cancelMatch(secondMatch.matchId());
 
-    matchService.cancelMatch(createdMatches.get(1).matchId());
+    Player updatedPlayerOne = playerService.getPlayerById(playerOne.playerId());
+    Player updatedPlayerTwo = playerService.getPlayerById(playerTwo.playerId());
+    Player updatedPlayerThree = playerService.getPlayerById(playerThree.playerId());
+    Player updatedPlayerFour = playerService.getPlayerById(playerFour.playerId());
 
-    List<Match> subsequentMatches =
-        matchRepository.findMatchesByPlayersAfter(
-            createdMatches.get(1).createdAt(), players[2].playerId(), players[3].playerId());
+    assertThat(updatedPlayerOne.getEloRating()).isEqualTo(new BigDecimal("1215.00"));
+    assertThat(updatedPlayerTwo.getEloRating()).isEqualTo(new BigDecimal("1185.00"));
+    assertThat(updatedPlayerThree.getEloRating()).isEqualTo(new BigDecimal("1215.00"));
+    assertThat(updatedPlayerFour.getEloRating()).isEqualTo(new BigDecimal("1185.00"));
 
-    for (Match match : subsequentMatches) {
-      if (match.getWinner().getPlayerId() == players[3].playerId()
-          || match.getLoser().getPlayerId() == players[3].playerId()) {
-        Player updatedPlayer = playerService.getPlayerById(players[3].playerId());
-        assertThat(updatedPlayer.getEloRating())
-            .isEqualTo(initialRatings[3].setScale(2, BigDecimal.ROUND_HALF_UP));
-      }
-    }
+    assertThat(matchRepository.existsById(secondMatch.matchId())).isFalse();
+    assertThat(matchRepository.existsById(firstMatch.matchId())).isTrue();
+    assertThat(matchRepository.existsById(thirdMatch.matchId())).isTrue();
   }
 }
