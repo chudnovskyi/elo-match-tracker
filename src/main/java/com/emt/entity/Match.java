@@ -3,6 +3,7 @@ package com.emt.entity;
 import static jakarta.persistence.FetchType.LAZY;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.Instant;
 import lombok.AllArgsConstructor;
@@ -30,9 +31,6 @@ public class Match {
   @JoinColumn(name = "loser_id")
   private Player loser;
 
-  @Column(name = "is_cancelled")
-  private boolean isCancelled;
-
-  private BigDecimal winnerRatingChange;
-  private Instant createdAt;
+  @NotNull private BigDecimal winnerRatingChange;
+  @NotNull private Instant createdAt;
 }

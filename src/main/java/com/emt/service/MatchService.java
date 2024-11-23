@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class MatchService {
 
   private static final BigDecimal CONSTANT_K = new BigDecimal("30");
@@ -59,6 +58,8 @@ public class MatchService {
     winner.setEloRating(winner.getEloRating().add(winnerRatingGain));
     loser.setEloRating(loser.getEloRating().add(loserRatingLoss));
 
+    playerService.saveWinnerAndLoser(winner, loser);
+
     return winnerRatingGain;
   }
 
@@ -70,6 +71,7 @@ public class MatchService {
     return ONE.divide(divisor, 2, HALF_UP);
   }
 
+  @Transactional
   public void cancelMatch(Long matchId) {
     Match matchToCancel =
         matchRepository.findById(matchId).orElseThrow(() -> new MatchNotFoundException(matchId));
@@ -89,7 +91,6 @@ public class MatchService {
 
     recalculateEloRatingsForSubsequentMatches(subsequentMatches);
 
-    matchToCancel.setCancelled(true);
     matchRepository.deleteById(matchId);
   }
 
