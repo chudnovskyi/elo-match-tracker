@@ -96,8 +96,12 @@ public class MatchService {
 
   public void recalculateEloRatingsForSubsequentMatches(List<Match> matches) {
     for (Match match : matches) {
-      match.getWinner().getEloRating().subtract(match.getWinnerRatingChange());
-      match.getLoser().getEloRating().add(match.getWinnerRatingChange());
+      Player winner = playerService.getPlayerById(match.getWinner().getPlayerId());
+      Player loser = playerService.getPlayerById(match.getLoser().getPlayerId());
+
+      BigDecimal winnerRatingChange = updateEloRatings(winner, loser);
+
+      match.setWinnerRatingChange(winnerRatingChange);
 
       matchRepository.save(match);
     }
