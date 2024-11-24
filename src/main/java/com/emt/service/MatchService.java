@@ -99,6 +99,9 @@ public class MatchService {
       Player winner = playerService.getPlayerById(match.getWinner().getPlayerId());
       Player loser = playerService.getPlayerById(match.getLoser().getPlayerId());
 
+      winner.setEloRating(winner.getEloRating().subtract(match.getWinnerRatingChange()));
+      loser.setEloRating(loser.getEloRating().add(match.getWinnerRatingChange()));
+
       BigDecimal winnerRatingChange = updateEloRatings(winner, loser);
 
       match.setWinnerRatingChange(winnerRatingChange);

@@ -109,4 +109,67 @@ public class MatchServiceIT extends ITBase {
     assertThat(matchRepository.existsById(firstMatch.matchId())).isTrue();
     assertThat(matchRepository.existsById(thirdMatch.matchId())).isTrue();
   }
+
+  @Test
+  public void testPlayerNameDoesNotChange() {
+    PlayerResponse firstPlayer =
+        playerService.createPlayer(CreatePlayerRequest.builder().nickname("Winner").build());
+    PlayerResponse secondPlayer =
+        playerService.createPlayer(CreatePlayerRequest.builder().nickname("Loser").build());
+
+    String firstPlayerNameBefore = firstPlayer.nickname();
+    String secondPlayerNameBefore = secondPlayer.nickname();
+
+    matchService.createMatch(
+        new CreateMatchRequest(firstPlayer.playerId(), secondPlayer.playerId()));
+
+    // Проверка, что имена игроков не изменились
+    Player updatedFirstPlayer = playerService.getPlayerById(firstPlayer.playerId());
+    Player updatedSecondPlayer = playerService.getPlayerById(secondPlayer.playerId());
+
+    assertEquals(firstPlayerNameBefore, updatedFirstPlayer.getNickname());
+    assertEquals(secondPlayerNameBefore, updatedSecondPlayer.getNickname());
+  }
+
+  @Test
+  public void testPlayerIdInMatchDoesNotChange() {
+    PlayerResponse firstPlayer =
+        playerService.createPlayer(CreatePlayerRequest.builder().nickname("Winner").build());
+    PlayerResponse secondPlayer =
+        playerService.createPlayer(CreatePlayerRequest.builder().nickname("Loser").build());
+
+    Long firstPlayerIdBefore = firstPlayer.playerId();
+    Long secondPlayerIdBefore = secondPlayer.playerId();
+
+    matchService.createMatch(
+        new CreateMatchRequest(firstPlayer.playerId(), secondPlayer.playerId()));
+
+    Player updatedFirstPlayer = playerService.getPlayerById(firstPlayer.playerId());
+    Player updatedSecondPlayer = playerService.getPlayerById(secondPlayer.playerId());
+
+    assertThat(updatedFirstPlayer.getPlayerId()).isEqualTo(firstPlayerIdBefore);
+    assertThat(updatedSecondPlayer.getPlayerId()).isEqualTo(secondPlayerIdBefore);
+  }
+
+  @Test
+  public void testMatchDoesNotModifyExistingInfo() {
+    PlayerResponse firstPlayer =
+        playerService.createPlayer(CreatePlayerRequest.builder().nickname("Winner").build());
+    PlayerResponse secondPlayer =
+        playerService.createPlayer(CreatePlayerRequest.builder().nickname("Loser").build());
+
+    Player firstPlayerBeforeMatch = playerService.getPlayerById(firstPlayer.playerId());
+    Player secondPlayerBeforeMatch = playerService.getPlayerById(secondPlayer.playerId());
+
+    CreateMatchRequest matchRequest =
+        new CreateMatchRequest(firstPlayer.playerId(), secondPlayer.playerId());
+
+    matchService.createMatch(matchRequest);
+
+    Player firstPlayerAfterMatch = playerService.getPlayerById(firstPlayer.playerId());
+    Player secondPlayerAfterMatch = playerService.getPlayerById(secondPlayer.playerId());
+
+    assertThat(firstPlayerAfterMatch.getNickname()).isEqualTo(firstPlayerBeforeMatch.getNickname());
+    assertThat(secondPlayerAfterMatch.getNickname()).isEqualTo(secondPlayerBeforeMatch.getNickname());
+  }
 }
