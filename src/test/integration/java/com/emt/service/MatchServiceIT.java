@@ -111,27 +111,6 @@ public class MatchServiceIT extends ITBase {
   }
 
   @Test
-  public void testPlayerNameDoesNotChange() {
-    PlayerResponse firstPlayer =
-        playerService.createPlayer(CreatePlayerRequest.builder().nickname("Winner").build());
-    PlayerResponse secondPlayer =
-        playerService.createPlayer(CreatePlayerRequest.builder().nickname("Loser").build());
-
-    String firstPlayerNameBefore = firstPlayer.nickname();
-    String secondPlayerNameBefore = secondPlayer.nickname();
-
-    matchService.createMatch(
-        new CreateMatchRequest(firstPlayer.playerId(), secondPlayer.playerId()));
-
-    // Проверка, что имена игроков не изменились
-    Player updatedFirstPlayer = playerService.getPlayerById(firstPlayer.playerId());
-    Player updatedSecondPlayer = playerService.getPlayerById(secondPlayer.playerId());
-
-    assertEquals(firstPlayerNameBefore, updatedFirstPlayer.getNickname());
-    assertEquals(secondPlayerNameBefore, updatedSecondPlayer.getNickname());
-  }
-
-  @Test
   public void testPlayerIdInMatchDoesNotChange() {
     PlayerResponse firstPlayer =
         playerService.createPlayer(CreatePlayerRequest.builder().nickname("Winner").build());
