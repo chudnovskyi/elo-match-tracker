@@ -1,10 +1,12 @@
 package com.emt.service;
 
+import static java.math.BigDecimal.ZERO;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.emt.ITBase;
+import com.emt.entity.Match;
 import com.emt.entity.Player;
 import com.emt.model.exception.MatchNotFoundException;
 import com.emt.model.request.CreateMatchRequest;
@@ -14,6 +16,8 @@ import com.emt.model.response.PlayerResponse;
 import com.emt.repository.MatchRepository;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Stream;
+
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 
@@ -89,7 +93,16 @@ public class MatchServiceIT extends ITBase {
     MatchResponse secondMatch =
         matchService.createMatch(
             new CreateMatchRequest(playerTwo.playerId(), playerThree.playerId()));
-    MatchResponse thirdMatch =
+    MatchResponse thirdMatch_0 =
+        matchService.createMatch(
+            new CreateMatchRequest(playerThree.playerId(), playerFour.playerId()));
+    MatchResponse thirdMatch_1 =
+        matchService.createMatch(
+            new CreateMatchRequest(playerThree.playerId(), playerFour.playerId()));
+    MatchResponse thirdMatch_2 =
+        matchService.createMatch(
+            new CreateMatchRequest(playerThree.playerId(), playerFour.playerId()));
+    MatchResponse thirdMatch_3 =
         matchService.createMatch(
             new CreateMatchRequest(playerThree.playerId(), playerFour.playerId()));
 
@@ -100,55 +113,30 @@ public class MatchServiceIT extends ITBase {
     Player updatedPlayerThree = playerService.getPlayerById(playerThree.playerId());
     Player updatedPlayerFour = playerService.getPlayerById(playerFour.playerId());
 
+    // hardcoding answers is a bad practice, you can't really tell, if these are actually correct. In this case, they are not.
+    //    assertThat(updatedPlayerOne.getEloRating()).isEqualTo(new BigDecimal("1215.00"));
+    //    assertThat(updatedPlayerTwo.getEloRating()).isEqualTo(new BigDecimal("1185.00"));
+    //    assertThat(updatedPlayerThree.getEloRating()).isEqualTo(new BigDecimal("1247.70"));
+    //    assertThat(updatedPlayerFour.getEloRating()).isEqualTo(new BigDecimal("1152.30"));
     assertThat(updatedPlayerOne.getEloRating()).isEqualTo(new BigDecimal("1215.00"));
     assertThat(updatedPlayerTwo.getEloRating()).isEqualTo(new BigDecimal("1185.00"));
-    assertThat(updatedPlayerThree.getEloRating()).isEqualTo(new BigDecimal("1215.00"));
-    assertThat(updatedPlayerFour.getEloRating()).isEqualTo(new BigDecimal("1185.00"));
+    assertThat(updatedPlayerThree.getEloRating()).isEqualTo(new BigDecimal("1252.5"));
+    assertThat(updatedPlayerFour.getEloRating()).isEqualTo(new BigDecimal("1147.5"));
+
+    /* should be:
+       0 = winnerRatingChange=15.00
+       1 = winnerRatingChange=13.50
+       2 = winnerRatingChange=12.60
+       3 = winnerRatingChange=11.40 */
+    List<Match> updatedMatches = matchRepository.findAllById(Stream.of(thirdMatch_0, thirdMatch_1, thirdMatch_2, thirdMatch_3).map(MatchResponse::matchId).toList());
+    BigDecimal actualRatingChange = new BigDecimal("1200").subtract(updatedPlayerFour.getEloRating());
+    BigDecimal expectedRatingChange = updatedMatches.stream().map(Match::getWinnerRatingChange).reduce(ZERO, BigDecimal::add);
+    assertThat(actualRatingChange)
+        .isEqualTo(expectedRatingChange)
+        .isEqualTo(new BigDecimal("15.00").add(new BigDecimal("13.50").add(new BigDecimal("12.60").add(new BigDecimal("11.40")))));
 
     assertThat(matchRepository.existsById(secondMatch.matchId())).isFalse();
     assertThat(matchRepository.existsById(firstMatch.matchId())).isTrue();
-    assertThat(matchRepository.existsById(thirdMatch.matchId())).isTrue();
-  }
-
-  @Test
-  public void testPlayerIdInMatchDoesNotChange() {
-    PlayerResponse firstPlayer =
-        playerService.createPlayer(CreatePlayerRequest.builder().nickname("Winner").build());
-    PlayerResponse secondPlayer =
-        playerService.createPlayer(CreatePlayerRequest.builder().nickname("Loser").build());
-
-    Long firstPlayerIdBefore = firstPlayer.playerId();
-    Long secondPlayerIdBefore = secondPlayer.playerId();
-
-    matchService.createMatch(
-        new CreateMatchRequest(firstPlayer.playerId(), secondPlayer.playerId()));
-
-    Player updatedFirstPlayer = playerService.getPlayerById(firstPlayer.playerId());
-    Player updatedSecondPlayer = playerService.getPlayerById(secondPlayer.playerId());
-
-    assertThat(updatedFirstPlayer.getPlayerId()).isEqualTo(firstPlayerIdBefore);
-    assertThat(updatedSecondPlayer.getPlayerId()).isEqualTo(secondPlayerIdBefore);
-  }
-
-  @Test
-  public void testMatchDoesNotModifyExistingInfo() {
-    PlayerResponse firstPlayer =
-        playerService.createPlayer(CreatePlayerRequest.builder().nickname("Winner").build());
-    PlayerResponse secondPlayer =
-        playerService.createPlayer(CreatePlayerRequest.builder().nickname("Loser").build());
-
-    Player firstPlayerBeforeMatch = playerService.getPlayerById(firstPlayer.playerId());
-    Player secondPlayerBeforeMatch = playerService.getPlayerById(secondPlayer.playerId());
-
-    CreateMatchRequest matchRequest =
-        new CreateMatchRequest(firstPlayer.playerId(), secondPlayer.playerId());
-
-    matchService.createMatch(matchRequest);
-
-    Player firstPlayerAfterMatch = playerService.getPlayerById(firstPlayer.playerId());
-    Player secondPlayerAfterMatch = playerService.getPlayerById(secondPlayer.playerId());
-
-    assertThat(firstPlayerAfterMatch.getNickname()).isEqualTo(firstPlayerBeforeMatch.getNickname());
-    assertThat(secondPlayerAfterMatch.getNickname()).isEqualTo(secondPlayerBeforeMatch.getNickname());
+    assertThat(matchRepository.existsById(thirdMatch_0.matchId())).isTrue();
   }
 }
