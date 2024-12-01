@@ -1,0 +1,13 @@
+# temporary solution, while k8s is not configured
+services:
+  common_db:
+    container_name: postgres_container_emt
+    image: postgres:14
+    restart: always
+    ports:
+      - '5433:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql

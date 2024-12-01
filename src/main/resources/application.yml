@@ -1,5 +1,5 @@
 dbHost: localhost
-dbPort: 5432
+dbPort: 5433
 dbName: elt_database
 dbUsername: elt_user
 dbPassword: elt_pass
