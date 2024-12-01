@@ -41,18 +41,7 @@ public class PlayerControllerIT extends ITBase {
   void exceptionHandling_badRequestBody_expectMethodArgumentNotValidException() throws Exception {
     mockMvc
         .perform(
-            post("/players/register")
-                .content(
-                    """
-                                    {
-                                      "nickname": null
-                                    }
-                                    """)
-                .contentType(APPLICATION_JSON))
-        .andExpectAll(
-            status().isBadRequest(),
-            jsonPath("$.type").value(MethodArgumentNotValidException.class.getSimpleName()),
-            jsonPath("$.status").value(400),
-            jsonPath("$.detail.nickname").value("Nickname should not be null."));
+            post("/players/register").content("{\"nickname\": null}").contentType(APPLICATION_JSON))
+        .andExpectAll(status().is3xxRedirection(), flash().attribute("errorMessage", "nickname: Nickname should not be null.<br>"));
   }
 }

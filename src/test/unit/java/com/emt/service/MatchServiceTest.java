@@ -44,11 +44,11 @@ class MatchServiceTest {
       name =
           "[{index}] Calculate Elo-Ranking for winner rating {0}, loser rating {1}, expected change {2}")
   @CsvSource({
-    "1200, 1100, 10.80",
-    "1200, 1250, 17.10",
-    "1300, 1200, 10.80",
-    "1500, 1200, 4.50",
-    "1200, 1000, 7.20"
+    "1200, 1100, 10.8",
+    "1200, 1250, 17.1",
+    "1300, 1200, 10.8",
+    "1500, 1200, 4.5",
+    "1200, 1000, 7.2"
   })
   void calculateCorrectlyPlayersEloRating_WhenPlayersAreDifferent_ShouldCalculateCorrectlyEloRating(
       String winnerRatingStr, String loserRatingStr, String expectedChangeStr) {

@@ -64,6 +64,9 @@ public class PlayerServiceIT extends ITBase {
     PlayerResponse expectedResponse = playerMapper.mapToResponse(expectedPlayer);
 
     assertThat(savedPlayer.getNickname()).isEqualTo(expectedPlayer.getNickname());
-    assertThat(actualPlayer).isEqualTo(expectedResponse);
+    assertThat(actualPlayer.playerId()).isEqualTo(expectedResponse.playerId());
+    assertThat(actualPlayer.nickname()).isEqualTo(expectedResponse.nickname());
+    assertThat(actualPlayer.registeredAt()).isEqualTo(expectedResponse.registeredAt());
+    assertThat(actualPlayer.eloRating()).isEqualByComparingTo(expectedResponse.eloRating());
   }
 }

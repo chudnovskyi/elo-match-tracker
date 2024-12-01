@@ -127,7 +127,7 @@ public class MatchServiceIT extends ITBase {
     BigDecimal expectedRatingChange = updatedMatches.stream().map(Match::getRatingChange).reduce(ZERO, BigDecimal::add);
     assertThat(actualRatingChange)
         .isEqualByComparingTo(expectedRatingChange)
-        .isEqualByComparingTo(new BigDecimal("15.00").add(new BigDecimal("13.50").add(new BigDecimal("12.60").add(new BigDecimal("11.40")))));
+        .isEqualByComparingTo(new BigDecimal("15.0").add(new BigDecimal("13.5").add(new BigDecimal("12.6").add(new BigDecimal("11.4")))));
 
     assertThat(matchRepository.existsById(secondMatch.matchId())).isFalse();
     assertThat(matchRepository.existsById(firstMatch.matchId())).isTrue();

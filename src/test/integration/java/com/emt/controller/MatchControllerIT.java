@@ -1,7 +1,6 @@
 package com.emt.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -52,23 +51,19 @@ public class MatchControllerIT extends ITBase {
   }
 
   @Test
-  @SuppressWarnings("PMD.AvoidDuplicateLiterals")
   void createMatch_withIdenticalPlayers_expectIdenticalPlayersException() throws Exception {
     PlayerResponse player =
         playerService.createPlayer(
             CreatePlayerRequest.builder().nickname("duplicatePlayer").build());
-
-    assertNotNull(player.playerId(), "PlayerId should not be null");
 
     mockMvc
         .perform(
             post("/matches/report")
                 .param("winnerId", String.valueOf(player.playerId()))
                 .param("loserId", String.valueOf(player.playerId())))
-        .andExpect(status().isConflict())
-        .andExpect(jsonPath("$.type").value("IdenticalPlayersException"))
-        .andExpect(jsonPath("$.status").value(409))
-        .andExpect(jsonPath("$.detail").value("A match cannot be created with identical players."));
+        .andExpectAll(
+            status().is3xxRedirection(),
+            flash().attribute("errorMessage", "A match cannot be created with identical players."));
   }
 
   @Test

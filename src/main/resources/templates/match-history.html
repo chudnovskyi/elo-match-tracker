@@ -43,7 +43,7 @@
                 </td>
                 <td>
                     <span th:text="${match.loserName}">Loser</span>
-                    <span class="rating-change-negative" th:text="|[${match.winnerRating()}] -${match.ratingChange()}|"></span>
+                    <span class="rating-change-negative" th:text="|[${match.loserRating()}] -${match.ratingChange()}|"></span>
                 </td>
                 <td>
                     <form th:action="@{/matches/cancel}" method="post">

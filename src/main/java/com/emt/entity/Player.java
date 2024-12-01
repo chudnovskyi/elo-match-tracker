@@ -23,6 +23,6 @@ public class Player {
   private Long playerId;
 
   @NotNull private String nickname;
-  @NotNull @Default private BigDecimal rating = new BigDecimal("1200");
+  @NotNull @Default private BigDecimal rating = new BigDecimal("1200.0");
   @NotNull private Instant registeredAt;
 }
