@@ -7,6 +7,8 @@ import com.emt.model.exception.PlayerNotFoundException;
 import com.emt.model.request.CreatePlayerRequest;
 import com.emt.model.response.PlayerResponse;
 import com.emt.repository.PlayerRepository;
+
+import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +25,7 @@ public class PlayerService {
 
   public List<PlayerResponse> getAllPlayers() {
     return playerRepository.findAll().stream()
-        .sorted(Comparator.comparing(Player::getEloRating).reversed())
+        .sorted(Comparator.comparing(Player::getRating).reversed())
         .map(playerMapper::mapToResponse)
         .toList();
   }
@@ -46,7 +48,9 @@ public class PlayerService {
         .orElseThrow(() -> new PlayerNotFoundException(playerId));
   }
 
-  public List<Player> saveWinnerAndLoser(Player winner, Player loser) {
-    return playerRepository.saveAll(List.of(winner, loser));
+  public void updatePlayerRating(Long playerId, BigDecimal rating) {
+    Player player = getPlayerById(playerId);
+    player.setRating(rating);
+    playerRepository.save(player);
   }
 }

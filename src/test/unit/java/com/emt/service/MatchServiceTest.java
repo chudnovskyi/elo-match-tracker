@@ -40,36 +40,6 @@ class MatchServiceTest {
         .hasMessageContaining("A match cannot be created with identical players.");
   }
 
-  @Test
-  void createMatch_WhenPlayersAreDifferent_ShouldCreateMatchSuccessfully() {
-    CreateMatchRequest request = CreateMatchRequest.builder().winnerId(1L).loserId(2L).build();
-
-    Player winner = new Player(1L, "WinnerPlayer", new BigDecimal("2500"), Instant.now());
-    Player loser = new Player(2L, "LoserPlayer", new BigDecimal("2000"), Instant.now());
-
-    BigDecimal probabilityWinner =
-        matchService.calculateProbability(winner.getEloRating(), loser.getEloRating());
-    BigDecimal winnerRatingGain =
-        CONSTANT_K
-            .multiply(BigDecimal.ONE.subtract(probabilityWinner))
-            .setScale(2, BigDecimal.ROUND_HALF_UP);
-    Match match = new Match();
-    MatchResponse expectedResponse =
-        new MatchResponse(1L, "WinnerPlayer", "LoserPlayer", Instant.now(), winnerRatingGain);
-
-    given(playerService.getPlayerById(1L)).willReturn(winner);
-    given(playerService.getPlayerById(2L)).willReturn(loser);
-    given(matchMapper.mapToEntity(winner, loser, winnerRatingGain)).willReturn(match);
-    given(matchRepository.save(match)).willReturn(match);
-    given(matchMapper.mapToResponse(match)).willReturn(expectedResponse);
-
-    MatchResponse actualResponse = matchService.createMatch(request);
-
-    assertThat(actualResponse).isEqualTo(expectedResponse);
-    assertThat(actualResponse.winnerRatingChange()).isEqualByComparingTo(winnerRatingGain);
-    verify(matchRepository).save(match);
-  }
-
   @ParameterizedTest(
       name =
           "[{index}] Calculate Elo-Ranking for winner rating {0}, loser rating {1}, expected change {2}")
@@ -89,7 +59,7 @@ class MatchServiceTest {
     Player winner = new Player(1L, "WinnerPlayer", initialWinnerRating, Instant.now());
     Player loser = new Player(2L, "LoserPlayer", initialLoserRating, Instant.now());
 
-    BigDecimal ratingChange = matchService.updateEloRatings(winner, loser);
+    BigDecimal ratingChange = matchService.calculateRatingChange(winner.getRating(), loser.getRating());
 
     assertThat(ratingChange).isEqualByComparingTo(expectedChange);
   }

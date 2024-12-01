@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -22,6 +23,6 @@ public class Player {
   private Long playerId;
 
   @NotNull private String nickname;
-  @NotNull @Builder.Default private BigDecimal eloRating = new BigDecimal("1200");
+  @NotNull @Default private BigDecimal rating = new BigDecimal("1200");
   @NotNull private Instant registeredAt;
 }

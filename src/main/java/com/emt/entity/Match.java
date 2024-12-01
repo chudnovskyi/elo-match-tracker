@@ -31,6 +31,9 @@ public class Match {
   @JoinColumn(name = "loser_id")
   private Player loser;
 
-  @NotNull private BigDecimal winnerRatingChange;
+  @NotNull private BigDecimal ratingChange;
+  @NotNull private BigDecimal winnerRating;
+  @NotNull private BigDecimal loserRating;
+
   @NotNull private Instant createdAt;
 }

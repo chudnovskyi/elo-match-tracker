@@ -12,18 +12,21 @@ spring:
     version: 0.0.1.test
     description: Manage player registrations and track 1v1 matches using the Elo ranking system.
   datasource:
-    url: jdbc:postgresql://${dbHost}:${dbPort}/${dbName}?ApplicationName=${dbApplicationName}
+    url: jdbc:postgresql://${dbHost}:${dbPort}/${dbName}?ApplicationName=${dbApplicationName}&currentSchema=${dbSchema}
     username: ${dbUsername}
     password: ${dbPassword}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 2 # default is 10, set to a reasonable value
+      schema: ${dbSchema}
   flyway:
     schemas: ${dbSchema}
   jpa:
     properties:
       hibernate:
         default_schema: ${dbSchema}
+        show_sql: true
+        format_sql: true
 
 management:
   endpoints:

@@ -17,7 +17,6 @@ import com.emt.repository.MatchRepository;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Stream;
-
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 
@@ -62,8 +61,8 @@ public class MatchServiceIT extends ITBase {
     Player updatedFirstPlayer = playerService.getPlayerById(firstPlayer.playerId());
     Player updatedSecondPlayer = playerService.getPlayerById(secondPlayer.playerId());
 
-    assertThat(updatedFirstPlayer.getEloRating()).isGreaterThan(initialRatingFirstPlayer);
-    assertThat(updatedSecondPlayer.getEloRating()).isLessThan(initialRatingSecondPlayer);
+    assertThat(updatedFirstPlayer.getRating()).isGreaterThan(initialRatingFirstPlayer);
+    assertThat(updatedSecondPlayer.getRating()).isLessThan(initialRatingSecondPlayer);
   }
 
   @Test
@@ -113,15 +112,10 @@ public class MatchServiceIT extends ITBase {
     Player updatedPlayerThree = playerService.getPlayerById(playerThree.playerId());
     Player updatedPlayerFour = playerService.getPlayerById(playerFour.playerId());
 
-    // hardcoding answers is a bad practice, you can't really tell, if these are actually correct. In this case, they are not.
-    //    assertThat(updatedPlayerOne.getEloRating()).isEqualTo(new BigDecimal("1215.00"));
-    //    assertThat(updatedPlayerTwo.getEloRating()).isEqualTo(new BigDecimal("1185.00"));
-    //    assertThat(updatedPlayerThree.getEloRating()).isEqualTo(new BigDecimal("1247.70"));
-    //    assertThat(updatedPlayerFour.getEloRating()).isEqualTo(new BigDecimal("1152.30"));
-    assertThat(updatedPlayerOne.getEloRating()).isEqualTo(new BigDecimal("1215.00"));
-    assertThat(updatedPlayerTwo.getEloRating()).isEqualTo(new BigDecimal("1185.00"));
-    assertThat(updatedPlayerThree.getEloRating()).isEqualTo(new BigDecimal("1252.5"));
-    assertThat(updatedPlayerFour.getEloRating()).isEqualTo(new BigDecimal("1147.5"));
+    assertThat(updatedPlayerOne.getRating()).isEqualByComparingTo(new BigDecimal("1215"));
+    assertThat(updatedPlayerTwo.getRating()).isEqualByComparingTo(new BigDecimal("1185"));
+    assertThat(updatedPlayerThree.getRating()).isEqualByComparingTo(new BigDecimal("1252.5"));
+    assertThat(updatedPlayerFour.getRating()).isEqualByComparingTo(new BigDecimal("1147.5"));
 
     /* should be:
        0 = winnerRatingChange=15.00
@@ -129,11 +123,11 @@ public class MatchServiceIT extends ITBase {
        2 = winnerRatingChange=12.60
        3 = winnerRatingChange=11.40 */
     List<Match> updatedMatches = matchRepository.findAllById(Stream.of(thirdMatch_0, thirdMatch_1, thirdMatch_2, thirdMatch_3).map(MatchResponse::matchId).toList());
-    BigDecimal actualRatingChange = new BigDecimal("1200").subtract(updatedPlayerFour.getEloRating());
-    BigDecimal expectedRatingChange = updatedMatches.stream().map(Match::getWinnerRatingChange).reduce(ZERO, BigDecimal::add);
+    BigDecimal actualRatingChange = new BigDecimal("1200").subtract(updatedPlayerFour.getRating());
+    BigDecimal expectedRatingChange = updatedMatches.stream().map(Match::getRatingChange).reduce(ZERO, BigDecimal::add);
     assertThat(actualRatingChange)
-        .isEqualTo(expectedRatingChange)
-        .isEqualTo(new BigDecimal("15.00").add(new BigDecimal("13.50").add(new BigDecimal("12.60").add(new BigDecimal("11.40")))));
+        .isEqualByComparingTo(expectedRatingChange)
+        .isEqualByComparingTo(new BigDecimal("15.00").add(new BigDecimal("13.50").add(new BigDecimal("12.60").add(new BigDecimal("11.40")))));
 
     assertThat(matchRepository.existsById(secondMatch.matchId())).isFalse();
     assertThat(matchRepository.existsById(firstMatch.matchId())).isTrue();

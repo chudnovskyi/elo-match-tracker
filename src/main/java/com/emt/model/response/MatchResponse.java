@@ -10,4 +10,4 @@ public record MatchResponse(
     String winnerName,
     String loserName,
     Instant createdAt,
-    BigDecimal winnerRatingChange) {}
+    BigDecimal ratingChange) {}

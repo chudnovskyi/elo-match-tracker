@@ -20,7 +20,7 @@ public class PlayerMapper {
     return PlayerResponse.builder()
         .playerId(player.getPlayerId())
         .nickname(player.getNickname())
-        .eloRating(player.getEloRating())
+        .eloRating(player.getRating())
         .registeredAt(player.getRegisteredAt())
         .build();
   }

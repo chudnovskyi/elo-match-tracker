@@ -13,12 +13,15 @@ import com.emt.model.exception.MatchNotFoundException;
 import com.emt.model.request.CreateMatchRequest;
 import com.emt.model.response.MatchResponse;
 import com.emt.repository.MatchRepository;
-import jakarta.transaction.Transactional;
+
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -33,80 +36,77 @@ public class MatchService {
     return matchRepository.findAll().stream().map(matchMapper::mapToResponse).toList();
   }
 
+  public Match getMatchById(Long matchId) {
+    return matchRepository.findById(matchId).orElseThrow(() -> new MatchNotFoundException(matchId));
+  }
+
   public MatchResponse createMatch(CreateMatchRequest request) {
     if (request.winnerId().equals(request.loserId())) {
-      throw new IdenticalPlayersException("A match cannot be created with identical players.");
+      throw new IdenticalPlayersException();
     }
 
     Player winner = playerService.getPlayerById(request.winnerId());
     Player loser = playerService.getPlayerById(request.loserId());
 
-    BigDecimal winnerRatingChange = updateEloRatings(winner, loser);
+    BigDecimal ratingChange = calculateRatingChange(winner.getRating(), loser.getRating());
+    winner.setRating(winner.getRating().add(ratingChange));
+    loser.setRating(loser.getRating().subtract(ratingChange));
 
-    return Optional.of(matchMapper.mapToEntity(winner, loser, winnerRatingChange))
+    return Optional.of(matchMapper.mapToEntity(winner, loser, ratingChange))
         .map(matchRepository::save)
         .map(matchMapper::mapToResponse)
         .orElseThrow();
   }
 
-  public BigDecimal updateEloRatings(Player winner, Player loser) {
-    BigDecimal probabilityWinner =
-        calculateProbability(winner.getEloRating(), loser.getEloRating());
-    BigDecimal winnerRatingGain = CONSTANT_K.multiply(ONE.subtract(probabilityWinner));
-    BigDecimal loserRatingLoss = winnerRatingGain.negate();
-
-    winner.setEloRating(winner.getEloRating().add(winnerRatingGain));
-    loser.setEloRating(loser.getEloRating().add(loserRatingLoss));
-
-    playerService.saveWinnerAndLoser(winner, loser);
-
-    return winnerRatingGain;
-  }
-
-  public BigDecimal calculateProbability(BigDecimal rating1, BigDecimal rating2) {
-    BigDecimal exponent = rating2.subtract(rating1).divide(new BigDecimal("400"), 2, HALF_UP);
-    BigDecimal divisor =
-        ONE.add(pow(new BigDecimal("10"), exponent, DECIMAL128).setScale(2, HALF_UP));
-
-    return ONE.divide(divisor, 2, HALF_UP);
-  }
-
   @Transactional
   public void cancelMatch(Long matchId) {
-    Match matchToCancel =
-        matchRepository.findById(matchId).orElseThrow(() -> new MatchNotFoundException(matchId));
+    Map<Long, BigDecimal> playerIdToRatingMap = new HashMap<>();
 
-    Player winner = matchToCancel.getWinner();
-    Player loser = matchToCancel.getLoser();
-    BigDecimal winnerRatingChange = matchToCancel.getWinnerRatingChange();
+    Match match = getMatchById(matchId);
 
-    winner.setEloRating(winner.getEloRating().subtract(winnerRatingChange));
-    loser.setEloRating(loser.getEloRating().add(winnerRatingChange));
+    Long winnerId = match.getWinner().getPlayerId();
+    Long loserId = match.getLoser().getPlayerId();
 
-    playerService.saveWinnerAndLoser(winner, loser);
+    BigDecimal ratingChange = match.getRatingChange();
+    playerIdToRatingMap.put(winnerId, match.getWinnerRating().subtract(ratingChange));
+    playerIdToRatingMap.put(loserId, match.getLoserRating().add(ratingChange));
 
     List<Match> subsequentMatches =
-        matchRepository.findMatchesByPlayersAfter(
-            matchToCancel.getCreatedAt(), winner.getPlayerId(), loser.getPlayerId());
+        matchRepository.findMatchesByPlayersAfter(match.getCreatedAt(), winnerId, loserId);
 
-    recalculateEloRatingsForSubsequentMatches(subsequentMatches);
+    recalculateEloRatingsForSubsequentMatches(subsequentMatches, playerIdToRatingMap);
 
     matchRepository.deleteById(matchId);
+
+    playerIdToRatingMap.forEach(playerService::updatePlayerRating);
   }
 
-  public void recalculateEloRatingsForSubsequentMatches(List<Match> matches) {
+  public void recalculateEloRatingsForSubsequentMatches(List<Match> matches, Map<Long, BigDecimal> playerIdToRatingMap) {
     for (Match match : matches) {
-      Player winner = playerService.getPlayerById(match.getWinner().getPlayerId());
-      Player loser = playerService.getPlayerById(match.getLoser().getPlayerId());
+      Long winnerId = match.getWinner().getPlayerId();
+      Long loserId = match.getLoser().getPlayerId();
+      BigDecimal winnerRating = Optional.ofNullable(playerIdToRatingMap.get(winnerId)).orElseGet(() -> match.getWinnerRating().subtract(match.getRatingChange()));
+      BigDecimal loserRating = Optional.ofNullable(playerIdToRatingMap.get(loserId)).orElseGet(() -> match.getLoserRating().add(match.getRatingChange()));
 
-      winner.setEloRating(winner.getEloRating().subtract(match.getWinnerRatingChange()));
-      loser.setEloRating(loser.getEloRating().add(match.getWinnerRatingChange()));
+      BigDecimal newRatingChange = calculateRatingChange(winnerRating, loserRating);
+      BigDecimal newWinnerRating = winnerRating.add(newRatingChange);
+      BigDecimal newLoserRating = loserRating.subtract(newRatingChange);
 
-      BigDecimal winnerRatingChange = updateEloRatings(winner, loser);
+      match.setWinnerRating(newWinnerRating);
+      match.setLoserRating(newLoserRating);
+      match.setRatingChange(newRatingChange);
 
-      match.setWinnerRatingChange(winnerRatingChange);
+      playerIdToRatingMap.put(winnerId, newWinnerRating);
+      playerIdToRatingMap.put(loserId, newLoserRating);
 
       matchRepository.save(match);
     }
+  }
+
+  public BigDecimal calculateRatingChange(BigDecimal rating1, BigDecimal rating2) {
+    BigDecimal exponent = rating2.subtract(rating1).divide(new BigDecimal("400"), 2, HALF_UP);
+    BigDecimal divisor = ONE.add(pow(new BigDecimal("10"), exponent, DECIMAL128).setScale(2, HALF_UP));
+    BigDecimal probabilityWinner = ONE.divide(divisor, 2, HALF_UP);
+    return CONSTANT_K.multiply(ONE.subtract(probabilityWinner));
   }
 }
