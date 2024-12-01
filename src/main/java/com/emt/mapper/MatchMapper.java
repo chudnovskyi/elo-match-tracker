@@ -29,6 +29,8 @@ public class MatchMapper {
         .winnerName(match.getWinner().getNickname())
         .loserName(match.getLoser().getNickname())
         .ratingChange(match.getRatingChange())
+        .winnerRating(match.getWinnerRating())
+        .loserRating(match.getLoserRating())
         .createdAt(match.getCreatedAt())
         .build();
   }

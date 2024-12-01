@@ -1,9 +1,13 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
 <head>
-    <link rel="stylesheet" href="./styles/styles.css">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../static/css/styles.css" th:href="@{/css/styles.css}">
+
     <title>Elo Ranking</title>
 </head>
+
 <body>
 <header>
     <nav class="header-nav">
@@ -15,17 +19,17 @@
     </nav>
 </header>
 
-<main>
-    <div th:if="${error}" style="color: red;">
+<main class="container">
+    <div class="alert alert-error" th:if="${error}">
         <p th:text="${error}">Error occurred</p>
     </div>
 
-    <section>
+    <section class="ranking-section">
         <h2>Player Rankings</h2>
-        <ul>
-            <li th:each="player : ${players}">
+        <ul class="ranking-list">
+            <li class="ranking-item" th:each="player : ${players}">
                 <span th:text="${player.nickname}">nickname</span>
-                - <span th:text="${player.eloRating}">rating</span>
+                <span class="ranking-score" th:text="${player.eloRating}">rating</span>
             </li>
         </ul>
     </section>
@@ -33,8 +37,8 @@
     <section class="form-section">
         <h2>Add a New Player</h2>
         <form th:action="@{/players/register}" th:object="${playerRequest}" method="post">
-            <input type="text" th:field="*{nickname}" placeholder="Enter player name" required>
-            <button type="submit">Add Player</button>
+            <input class="input-field" type="text" th:field="*{nickname}" placeholder="Enter player name" required>
+            <button class="btn btn-primary" type="submit">Add Player</button>
         </form>
     </section>
 
@@ -42,20 +46,20 @@
         <h2>Report Match Outcome</h2>
         <form th:action="@{/matches/report}" th:object="${matchRequest}" method="post">
             <label for="winner">Winner:</label>
-            <select th:field="*{winnerId}" id="winner" required>
+            <select class="input-field" th:field="*{winnerId}" id="winner" required>
                 <option value="" disabled selected>Select Winner</option>
                 <option th:each="player : ${players}" th:value="${player.playerId}"
                         th:text="${player.nickname}"></option>
             </select>
 
             <label for="loser">Loser:</label>
-            <select th:field="*{loserId}" id="loser" required>
+            <select class="input-field" th:field="*{loserId}" id="loser" required>
                 <option value="" disabled selected>Select Loser</option>
                 <option th:each="player : ${players}" th:value="${player.playerId}"
                         th:text="${player.nickname}"></option>
             </select>
 
-            <button type="submit">Submit Match</button>
+            <button class="btn btn-secondary" type="submit">Submit Match</button>
         </form>
     </section>
 </main>

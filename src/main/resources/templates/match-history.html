@@ -1,47 +1,55 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
 <head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../static/css/styles.css" th:href="@{/css/styles.css}">
+
     <title>Match History</title>
 </head>
-<body>
-<nav class="header-nav">
-    <ul class="header-list">
-        <li class="header-item">
-            <a href="/players" class="header-link header-link-active">Main</a>
-        </li>
-    </ul>
-</nav>
 
-<h1>Match History</h1>
-<table>
+<body>
+<header>
+    <nav class="header-nav">
+        <ul class="header-list">
+            <li class="header-item">
+                <a href="/players" class="header-link header-link-active">Main</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<main class="container">
+<h1 th:align="center">Match History</h1>
+<table class="styled-table">
     <thead>
     <tr>
         <th>Date</th>
         <th>Winner</th>
         <th>Loser</th>
+        <th>Actions</th>
     </tr>
     </thead>
     <tbody>
     <tr th:each="match : ${matches}">
-        <td th:text="${match.createdAt != null ? #dates.format(match.createdAt, 'yyyy-MM-dd') : 'N/A'}">Date</td>
+        <td th:text="${#dates.format(match.createdAt, 'yyyy-MM-dd HH:MM')}">Date</td>
         <td>
             <span th:text="${match.winnerName}">Winner</span>
-            <br/>
-            <span th:text="${match.ratingChange()}"></span>
+            <span class="rating-change-positive" th:text="|[${match.winnerRating()}] +${match.ratingChange()}|"></span>
         </td>
         <td>
             <span th:text="${match.loserName}">Loser</span>
-            <br/>
-            <span th:text="${-match.ratingChange()}"></span>
+            <span class="rating-change-negative" th:text="|[${match.winnerRating()}] -${match.ratingChange()}|"></span>
         </td>
         <td>
             <form th:action="@{/matches/cancel}" method="post">
-                <input type="hidden" name="matchId" th:value="${match.matchId}"/>
-                <button type="submit">Cancel Match</button>
+                <input type="hidden" name="matchId" th:value="${match.matchId}">
+                <button class="btn btn-danger" type="submit">Cancel</button>
             </form>
         </td>
     </tr>
     </tbody>
 </table>
+</main>
 </body>
 </html>
